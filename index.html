@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Role Play Practice — Intelligent Systems Engineering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    /* Indiana University palette: crimson #990000, cream #EEEDEB */
+    --text: #191919;
+    --text-secondary: #555;
+    --text-tertiary: #888;
+    --border: #e2e2e2;
+    --bg: #fff;
+    --bg-soft: #f7f6f4;
+    --cream: #eeedeb;
+    --accent: #990000;
+    --accent-dark: #6d0000;
+    --accent-tint: #f5e9e9;
+    --gradient: linear-gradient(90deg, #990000, #4f0000);
+    --radius: 14px;
+    --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  body {
+    font-family: 'Libre Franklin', 'BentonSans', 'Franklin Gothic', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+
+  /* IU crimson university bar */
+  .iu-bar {
+    background: var(--accent);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .iu-bar .wordmark {
+    font-weight: 700;
+    font-size: 1.02rem;
+    letter-spacing: 0.01em;
+  }
+  .iu-bar .app-name {
+    font-weight: 300;
+    font-size: 0.95rem;
+    color: var(--cream);
+    border-left: 1px solid rgba(255, 255, 255, 0.4);
+    padding-left: 14px;
+  }
+
+  .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ---------- Setup screen ---------- */
+  .hero { text-align: center; margin: 40px 0 36px; }
+  .hero h1 {
+    font-size: clamp(1.7rem, 4.5vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .hero h1 .grad {
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero p {
+    margin-top: 14px;
+    color: var(--text-secondary);
+    font-size: 1.02rem;
+  }
+
+  .prompt-box {
+    width: 100%;
+    min-height: 130px;
+    padding: 18px 20px;
+    font: inherit;
+    font-size: 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .prompt-box:focus { border-color: var(--accent); }
+
+  .center { text-align: center; }
+
+  .btn {
+    display: inline-block;
+    font: inherit;
+    font-size: 0.98rem;
+    font-weight: 600;
+    padding: 13px 30px;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1.5px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--text-tertiary); color: var(--text); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+
+  .suggestions-label {
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 0.95rem;
+    margin: 34px 0 16px;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .chip {
+    font: inherit;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .chip:hover { border-color: var(--accent); background: var(--accent-tint); }
+
+  /* ---------- Scenario bank ---------- */
+  .bank { margin-top: 44px; }
+  .bank-heading {
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+  }
+  .bank details {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .bank summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 16px 20px;
+    font-weight: 600;
+    font-size: 0.97rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    transition: background 0.15s;
+  }
+  .bank summary::-webkit-details-marker { display: none; }
+  .bank summary:hover { background: var(--bg-soft); }
+  .bank summary .count {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+  }
+  .bank summary .arrow { transition: transform 0.15s; color: var(--text-tertiary); flex-shrink: 0; }
+  .bank details[open] summary .arrow { transform: rotate(90deg); }
+  .bank summary .cat-name { flex: 1; }
+
+  .scen-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    background: none;
+    border: none;
+    border-top: 1px solid var(--border);
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .scen-row:hover { background: var(--accent-tint); }
+  .lvl {
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    min-width: 74px;
+    text-align: center;
+  }
+  .lvl.warmup { background: var(--cream); color: #59524a; }
+  .lvl.standard { background: var(--accent-tint); color: var(--accent); }
+  .lvl.challenge { background: #191919; color: var(--cream); }
+  .scen-row .scen-text { flex: 1; min-width: 0; }
+  .scen-row .scen-title { font-size: 0.93rem; font-weight: 500; }
+  .scen-row .scen-with { font-size: 0.83rem; color: var(--text-secondary); margin-top: 1px; }
+
+  /* ---------- Edit screen ---------- */
+  .screen-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .screen-sub { color: var(--text-secondary); margin-bottom: 28px; }
+
+  .card {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 18px;
+  }
+  .card h3 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-tertiary);
+    margin-bottom: 14px;
+  }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+  }
+  .field input, .field textarea {
+    width: 100%;
+    font: inherit;
+    font-size: 0.95rem;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--accent); }
+  .field select {
+    width: 100%;
+    font: inherit;
+    font-size: 0.95rem;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .field select:focus { border-color: var(--accent); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 540px) { .field-row { grid-template-columns: 1fr; } }
+
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- Chat screen ---------- */
+  .chat-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--gradient);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .chat-header .who { flex: 1; min-width: 0; }
+  .chat-header .who .name { font-weight: 600; }
+  .chat-header .who .role {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chat-header .btn { padding: 9px 18px; font-size: 0.85rem; flex-shrink: 0; }
+  .voice-toggle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    font-size: 1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .voice-toggle:hover { border-color: var(--text-tertiary); }
+  .voice-toggle.off { opacity: 0.45; }
+
+  @keyframes speak-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(153, 0, 0, 0.35); }
+    50% { box-shadow: 0 0 0 9px rgba(153, 0, 0, 0); }
+  }
+  .avatar.speaking { animation: speak-pulse 1.1s ease-in-out infinite; }
+
+  .goal-banner {
+    background: var(--cream);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    color: #4a3f38;
+    margin-bottom: 20px;
+  }
+  .goal-banner strong { font-weight: 600; }
+
+  .messages {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 220px;
+    margin-bottom: 20px;
+  }
+  .msg {
+    max-width: 82%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 0.96rem;
+    white-space: pre-wrap;
+  }
+  .msg.persona {
+    align-self: flex-start;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+  }
+  .msg.student {
+    align-self: flex-end;
+    background: var(--accent);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .msg.typing {
+    color: var(--text-tertiary);
+    font-style: italic;
+  }
+
+  .composer {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+  .composer textarea {
+    flex: 1;
+    font: inherit;
+    font-size: 0.96rem;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    resize: none;
+    outline: none;
+    max-height: 160px;
+    transition: border-color 0.15s;
+  }
+  .composer textarea:focus { border-color: var(--accent); }
+  .icon-btn {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  .icon-btn:hover { background: var(--accent-dark); }
+  .icon-btn:disabled { opacity: 0.5; cursor: default; }
+  .icon-btn.mic { background: var(--bg-soft); color: var(--text-secondary); border: 1.5px solid var(--border); }
+  .icon-btn.mic:hover { color: var(--text); border-color: var(--text-tertiary); }
+  .icon-btn.mic.listening { background: #fde8e8; color: #c0392b; border-color: #e8b4b4; }
+
+  /* ---------- Feedback screen ---------- */
+  .overall {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    font-size: 1rem;
+    margin-bottom: 18px;
+  }
+  .score-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .score-row:last-child { border-bottom: none; }
+  .score-num {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--accent);
+    min-width: 42px;
+  }
+  .score-body { flex: 1; }
+  .score-body .crit { font-weight: 600; font-size: 0.95rem; }
+  .score-body .comment { font-size: 0.9rem; color: var(--text-secondary); margin-top: 2px; }
+
+  ul.fb-list { list-style: none; }
+  ul.fb-list li {
+    position: relative;
+    padding: 6px 0 6px 26px;
+    font-size: 0.95rem;
+  }
+  ul.fb-list li::before {
+    position: absolute;
+    left: 0;
+    font-weight: 700;
+  }
+  ul.fb-list.strengths li::before { content: '✓'; color: #1e7d3e; }
+  ul.fb-list.improve li::before { content: '→'; color: var(--accent); }
+
+  .rewrite-block { font-size: 0.94rem; }
+  .rewrite-block .said {
+    padding: 12px 16px;
+    background: var(--accent-tint);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 10px;
+    color: #5a1515;
+  }
+  .rewrite-block .instead {
+    padding: 12px 16px;
+    background: #f0f8f2;
+    border-left: 3px solid #4a9d68;
+    border-radius: 0 8px 8px 0;
+    color: #29543a;
+  }
+  .rewrite-block .why { margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem; }
+
+  /* ---------- Shared ---------- */
+  .error-banner {
+    display: none;
+    background: #fdf0ef;
+    border: 1px solid #f0c4bf;
+    color: #93372c;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    margin: 18px 0;
+  }
+  .error-banner.show { display: block; }
+
+  .spinner {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: -2px;
+    margin-right: 8px;
+  }
+  .spinner.dark { border-color: rgba(0,0,0,0.15); border-top-color: var(--text-secondary); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .privacy-note {
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 0.8rem;
+    margin-top: 48px;
+  }
+</style>
+</head>
+<body>
+<header class="iu-bar">
+  <span class="wordmark">Indiana University</span>
+  <span class="app-name">Role Play Practice · Intelligent Systems Engineering</span>
+</header>
+<div class="wrap">
+
+  <!-- ============ Screen 1: Setup ============ -->
+  <section class="screen active" id="screen-setup">
+    <div class="hero">
+      <h1>Practice the conversations engineers<br>actually have, with <span class="grad">AI-powered role play</span></h1>
+      <p>Describe a conversation you want to practice. We'll build the scenario — you can edit the details in the next step.</p>
+    </div>
+
+    <textarea class="prompt-box" id="setup-input"
+      placeholder="I want to practice explaining my capstone design decision to a skeptical committee member..."></textarea>
+
+    <div class="error-banner" id="setup-error"></div>
+
+    <div class="center" style="margin-top: 22px;">
+      <button class="btn btn-primary" id="btn-create">Create role play</button>
+    </div>
+
+    <p class="suggestions-label">Suggestions for intelligent systems engineering</p>
+    <div class="chips" id="chips"></div>
+
+    <div class="bank">
+      <p class="bank-heading">Or start from the scenario bank — ready-made role plays you can edit before starting</p>
+      <div id="bank-list"></div>
+    </div>
+
+    <p class="privacy-note">Practice tool — conversations are not saved anywhere.<br>Please don't include personal information, grades, or anything you'd want kept private.</p>
+  </section>
+
+  <!-- ============ Screen 2: Edit scenario ============ -->
+  <section class="screen" id="screen-edit">
+    <h2 class="screen-title" id="edit-title-heading">Review your scenario</h2>
+    <p class="screen-sub">Edit anything before you start — the role play will follow whatever is written here.</p>
+
+    <div class="card">
+      <h3>Scenario</h3>
+      <div class="field">
+        <label for="f-title">Title</label>
+        <input id="f-title" type="text">
+      </div>
+      <div class="field">
+        <label for="f-situation">The situation</label>
+        <textarea id="f-situation" rows="3"></textarea>
+      </div>
+      <div class="field">
+        <label for="f-objective">Your goal in this conversation</label>
+        <textarea id="f-objective" rows="2"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Who you'll be talking to</h3>
+      <div class="field-row">
+        <div class="field">
+          <label for="f-name">Name</label>
+          <input id="f-name" type="text">
+        </div>
+        <div class="field">
+          <label for="f-role">Role</label>
+          <input id="f-role" type="text">
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-personality">Personality &amp; disposition</label>
+        <textarea id="f-personality" rows="2"></textarea>
+      </div>
+      <div class="field">
+        <label for="f-opening">Their opening line</label>
+        <textarea id="f-opening" rows="2"></textarea>
+      </div>
+      <div class="field" id="voice-field" style="display: none;">
+        <label for="f-voice">Their voice (spoken replies)</label>
+        <select id="f-voice"></select>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>What you'll be coached on</h3>
+      <div class="field">
+        <label for="f-rubric">Feedback criteria (one per line)</label>
+        <textarea id="f-rubric" rows="4"></textarea>
+      </div>
+    </div>
+
+    <div class="error-banner" id="edit-error"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="btn-back-setup">Back</button>
+      <button class="btn btn-primary" id="btn-start">Start role play</button>
+    </div>
+  </section>
+
+  <!-- ============ Screen 3: Chat ============ -->
+  <section class="screen" id="screen-chat">
+    <div class="chat-header">
+      <div class="avatar" id="chat-avatar">?</div>
+      <div class="who">
+        <div class="name" id="chat-name"></div>
+        <div class="role" id="chat-role"></div>
+      </div>
+      <button class="voice-toggle" id="btn-voice" style="display: none;"
+        title="Toggle spoken replies" aria-label="Toggle spoken replies" aria-pressed="true">🔊</button>
+      <button class="btn btn-secondary" id="btn-end">End &amp; get feedback</button>
+    </div>
+
+    <div class="goal-banner"><strong>Your goal:</strong> <span id="chat-goal"></span></div>
+
+    <div class="messages" id="messages" aria-live="polite"></div>
+
+    <div class="error-banner" id="chat-error"></div>
+
+    <div class="composer">
+      <button class="icon-btn mic" id="btn-mic" title="Speak instead of typing" aria-label="Dictate your reply">🎤</button>
+      <textarea id="chat-input" rows="1" placeholder="Type your reply..."></textarea>
+      <button class="icon-btn" id="btn-send" title="Send" aria-label="Send">➤</button>
+    </div>
+  </section>
+
+  <!-- ============ Screen 4: Feedback ============ -->
+  <section class="screen" id="screen-feedback">
+    <h2 class="screen-title">Your feedback</h2>
+    <p class="screen-sub" id="fb-scenario-name"></p>
+
+    <div class="overall" id="fb-overall"></div>
+
+    <div class="card">
+      <h3>How you did on each criterion</h3>
+      <div id="fb-scores"></div>
+    </div>
+
+    <div class="card">
+      <h3>What worked</h3>
+      <ul class="fb-list strengths" id="fb-strengths"></ul>
+    </div>
+
+    <div class="card">
+      <h3>What to work on</h3>
+      <ul class="fb-list improve" id="fb-improvements"></ul>
+    </div>
+
+    <div class="card" id="fb-rewrite-card">
+      <h3>Try this instead</h3>
+      <div class="rewrite-block">
+        <div class="said" id="fb-said"></div>
+        <div class="instead" id="fb-instead"></div>
+        <div class="why" id="fb-why"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="btn-retry">Practice this again</button>
+      <button class="btn btn-primary" id="btn-new">New scenario</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // Calls go through the shared Cloudflare Worker (same proxy the other apps use);
+  // the Anthropic API key lives there as a Worker secret, never in this page.
+  const PROXY_URL = 'https://dinner-picker-proxy.akesha.workers.dev';
+  const MODEL = 'claude-sonnet-4-6';
+
+  // ElevenLabs voice proxy (see role-play-voice-worker.js for one-time setup).
+  // Deploy that Worker as "roleplay-voice" and this URL is already correct.
+  // Set to '' to run text-only — all voice UI hides itself automatically.
+  const VOICE_PROXY_URL = 'https://roleplay-voice.akesha.workers.dev';
+
+  // ElevenLabs premade voices offered in the persona voice picker.
+  // These IDs must stay in sync with ALLOWED_VOICE_IDS in role-play-voice-worker.js.
+  const VOICES = [
+    { id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel', desc: 'warm, measured — adult female' },
+    { id: 'AZnzlk1XvdvUeBnXmlld', name: 'Domi',   desc: 'confident, brisk — younger female' },
+    { id: 'MF3mGyEYCl7XYWbV9V6O', name: 'Elli',   desc: 'bright, upbeat — younger female' },
+    { id: 'ErXwobaYiN019PkySvjV', name: 'Antoni', desc: 'friendly, energetic — adult male' },
+    { id: 'TxGEqnHWrfWFTfGW9XjX', name: 'Josh',   desc: 'casual, relaxed — younger male' },
+    { id: 'pNInz6obpgDQGcFmaJgB', name: 'Adam',   desc: 'deep, serious — adult male' },
+    { id: 'VR6AewLTigWG4xSOukaG', name: 'Arnold', desc: 'gruff, no-nonsense — older male' }
+  ];
+  const DEFAULT_VOICE = 'Rachel';
+
+  // Voice casting for the scenario bank personas (by persona name).
+  const VOICE_BY_PERSONA = {
+    'Diane Okafor': 'Rachel',      'Patricia Vance': 'Domi',      'Gene Maldonado': 'Arnold',
+    'Councilwoman Rita Salazar': 'Domi', 'Tommy Reyes': 'Josh',   'Marcus Ellroy': 'Antoni',
+    'Dr. Alan Whitfield': 'Adam',  'Frank Delgado': 'Arnold',     'Prof. Deborah Lin': 'Rachel',
+    'Dr. Samuel Osei': 'Antoni',   'Ken Brody': 'Josh',           'Dr. Ingrid Kessler': 'Rachel',
+    'Renee Calloway, RN': 'Domi',  'David Okonkwo': 'Adam',       'Ray Stachowski': 'Arnold',
+    'Maya Lindqvist': 'Domi',      'Jess Palmer': 'Elli',         'Viktor Aris': 'Adam',
+    'Angela Freeman': 'Rachel',    'Marcus Chen': 'Arnold',       'Priya Raman': 'Elli',
+    'Eli Novak': 'Josh',           'Sofia Marchetti': 'Domi',     'Jordan Blake': 'Antoni'
+  };
+
+  const SUGGESTIONS = [
+    'Explain a sensor-design tradeoff to a non-technical stakeholder',
+    'Elicit requirements from a vague client for an embedded systems project',
+    'Defend a model choice when a committee member pushes back',
+    'Discuss failure modes of an autonomous system with a worried user',
+    'Explain my capstone project in a technical interview',
+    'Disagree with a teammate about our system architecture'
+  ];
+
+  // Curated scenario bank. Each entry can be edited on the review screen
+  // before starting, so these are starting points, not scripts.
+  const SCENARIO_BANK = [
+    {
+      category: 'Explain a tradeoff to a non-technical stakeholder',
+      scenarios: [
+        {
+          level: 'warmup',
+          title: 'Battery Life vs. Live Video',
+          situation: 'You built a solar-powered wildlife camera system for a community garden nonprofit. The director loves the idea of a live video feed on their website, but the hardware can only do periodic snapshots on the current power budget. You\'re meeting to walk her through the tradeoff.',
+          objective: 'Help her understand why live video and month-long battery life can\'t coexist on this hardware, and guide her to a choice she feels good about — without drowning her in numbers.',
+          persona: {
+            name: 'Diane Okafor',
+            role: 'Executive Director, Rootwork Community Gardens',
+            personality: 'Warm, enthusiastic, and completely non-technical. She asks lots of questions and isn\'t embarrassed to say she doesn\'t follow. She cares about donor engagement — the live feed was her idea.',
+            openingLine: 'Okay, so before we get into the details — I\'ve been telling everyone about the live camera feed. The donors are so excited. That\'s still happening, right?'
+          },
+          rubric: [
+            'Explains the power/feature tradeoff without jargon or condescension',
+            'Uses analogies or concrete comparisons a non-engineer can picture',
+            'Preserves the stakeholder\'s enthusiasm while correcting her expectation',
+            'Offers a realistic alternative that serves her actual goal (donor engagement)'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'Edge vs. Cloud for Fall Detection',
+          situation: 'Your team is piloting a fall-detection system in an assisted-living facility. The administrator read that "the cloud is more powerful" and wants everything processed there. You chose on-device processing for latency and privacy reasons, and you\'re meeting to explain why.',
+          objective: 'Explain the edge-versus-cloud tradeoff in terms of what she actually cares about — response time, resident privacy, and what happens when the internet goes down — and get her comfortable with the design.',
+          persona: {
+            name: 'Patricia Vance',
+            role: 'Administrator, Silver Birch Assisted Living',
+            personality: 'Businesslike and risk-averse. She\'s heard buzzwords from vendors and repeats them with confidence. She responds well to concrete scenarios about her residents and poorly to abstract technical arguments.',
+            openingLine: 'I\'ll be honest with you — the vendor we almost went with said everything runs in the cloud, and that\'s where all the AI power is. Why would we want a less powerful system?'
+          },
+          rubric: [
+            'Translates edge vs. cloud into consequences the administrator cares about',
+            'Addresses the "cloud is more powerful" belief respectfully without dismissing it',
+            'Uses a concrete failure scenario (e.g., internet outage during a fall) effectively',
+            'Checks for understanding rather than lecturing',
+            'Closes with a clear recommendation and rationale'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'Cost vs. Redundancy for Crop Drones',
+          situation: 'A farm cooperative hired your team to design a drone-based crop survey system. The treasurer has flagged that your proposal costs 40% more than a competitor\'s, mostly because you specified redundant sensors and a second backup drone. You\'re meeting to justify the difference.',
+          objective: 'Make the case that redundancy is what makes the system dependable during the narrow harvest-decision windows — and help him weigh cost against the risk of a blind week in the season.',
+          persona: {
+            name: 'Gene Maldonado',
+            role: 'Treasurer, Prairie Line Growers Cooperative',
+            personality: 'Frugal, sharp with numbers, and skeptical of engineers gold-plating things. He respects straight answers about money and gets impatient with hedging. He\'s not hostile — he just needs the cost justified in dollars and risk.',
+            openingLine: 'Your bid came in 40% over the other one, and as far as I can tell it does the same job. Walk me through why I shouldn\'t just take the cheaper option.'
+          },
+          rubric: [
+            'Frames redundancy in terms of financial risk, not engineering elegance',
+            'Quantifies or concretely illustrates the cost of a system failure during harvest',
+            'Acknowledges the competitor\'s option fairly instead of trashing it',
+            'Gives the treasurer a clear way to compare the two bids on total risk'
+          ]
+        },
+        {
+          level: 'challenge',
+          title: 'The Crosswalk Sensor Can\'t Be Perfect',
+          situation: 'Your team built a smart-crosswalk pedestrian detection pilot for the city. At a public works meeting, a council member wants you to confirm the system will "always detect a pedestrian, one hundred percent of the time" before she votes to fund the expansion. It can\'t — no detection system can — and you need to say so without killing the project.',
+          objective: 'Be honest that 100% detection is impossible, explain how the system is engineered to fail safely, and keep her confidence in the project.',
+          persona: {
+            name: 'Councilwoman Rita Salazar',
+            role: 'City Council Member, Public Safety Committee Chair',
+            personality: 'Politically savvy and used to yes/no answers. She interrupts long explanations and asks pointed follow-ups. A child was injured at an un-signaled crossing in her district last year, so this is personal — she is testing whether she can trust you.',
+            openingLine: 'I only have ten minutes before the next item, so I need a straight answer: if a child steps into that crosswalk, does your system see them every single time — yes or no?'
+          },
+          rubric: [
+            'Answers the yes/no question honestly and immediately, without dodging',
+            'Reframes from "perfect detection" to "engineered to fail safely" convincingly',
+            'Stays composed and concise under interruption and pressure',
+            'Uses the comparison to existing infrastructure (signals, human drivers) fairly',
+            'Ends with what she can honestly tell her constituents'
+          ]
+        }
+      ]
+    },
+    {
+      category: 'Elicit requirements from a vague client',
+      scenarios: [
+        {
+          level: 'warmup',
+          title: 'The Food Truck Parking App',
+          situation: 'A local food-truck owner wants "an app that tells me where to park." That\'s the whole brief. You\'re meeting him during his afternoon lull to figure out what he actually needs before you scope the project.',
+          objective: 'Uncover what "where to park" really means — what data would drive the recommendation, what decisions he makes now by gut, and what a useful answer looks like on a busy morning.',
+          persona: {
+            name: 'Tommy Reyes',
+            role: 'Owner-operator, La Plancha food truck',
+            personality: 'Friendly, fast-talking, and practical. He answers questions with stories about specific days and specific corners. He has no idea what data an app would need and will happily agree to anything that sounds smart, so vague questions get vague yeses.',
+            openingLine: 'So yeah, like I said — some days I pick a spot and it\'s dead, other days I\'m slammed. I just want the app to tell me where to go. How fast can you build that?'
+          },
+          rubric: [
+            'Asks about current decision-making before proposing features',
+            'Converts stories into concrete inputs (time, location, weather, events)',
+            'Resists scoping or promising before understanding the problem',
+            'Confirms understanding back to the client in his own terms'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'Smart Greenhouse, Vague Kickoff',
+          situation: 'You are a junior engineer at a small embedded systems consultancy. A local agricultural startup hired your firm to build an automated greenhouse monitoring and control system, and the one-paragraph brief just says "automate the greenhouse." You\'re the requirements lead on the first client call.',
+          objective: 'Extract enough concrete requirements to draft an initial system specification: sensor types, actuation needs, connectivity expectations, and any real-time or safety constraints.',
+          persona: {
+            name: 'Marcus Ellroy',
+            role: 'Co-founder and Operations Director, VerdeLoop Agritech',
+            personality: 'Energetic and visionary but hazy on specifics. He talks in outcomes ("the plants take care of themselves") rather than mechanisms, and tends to say "whatever you think is best" when pressed too abstractly. Concrete questions about his actual operation get great answers.',
+            openingLine: 'Great to finally connect — so yeah, basically we want the whole thing automated. Temperature, water, whatever it needs. The plants should basically take care of themselves. Where do we start?'
+          },
+          rubric: [
+            'Translates vague goals into specific measurable parameters',
+            'Asks about operational context and constraints',
+            'Identifies safety and failure-mode requirements without leading the client',
+            'Clarifies who the end users are and how they will interact with the system',
+            'Summarizes and confirms understanding before moving to the next topic'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'Who\'s on Which Machine?',
+          situation: 'The director of the campus makerspace wants "a system that knows who\'s using which machine" after a student was hurt on a lathe they weren\'t certified for. It\'s not clear whether this is about safety interlocks, access control, usage tracking, or liability records — possibly all four. You\'re meeting to find out.',
+          objective: 'Untangle the overlapping goals (safety, access, tracking, liability), find out which one actually drives the project, and surface the privacy questions before they become problems.',
+          persona: {
+            name: 'Dr. Alan Whitfield',
+            role: 'Director, University Makerspace',
+            personality: 'Thoughtful but shaken by the accident and juggling pressure from legal, facilities, and students. He conflates several different problems into one system and jumps between them mid-answer. He appreciates being slowed down and organized.',
+            openingLine: 'Thanks for coming in. After the incident last month, I just need to know who is on which machine, at all times, full stop. Legal is on me about it, students are worried about surveillance, and honestly I\'m not sure what I\'m allowed to track. Can you build something?'
+          },
+          rubric: [
+            'Separates the tangled goals into distinct requirements',
+            'Identifies the primary driver (safety) versus secondary wants',
+            'Raises privacy and data-retention questions proactively',
+            'Handles an anxious stakeholder with structure and calm',
+            'Ends with a prioritized, confirmed problem statement'
+          ]
+        },
+        {
+          level: 'challenge',
+          title: 'Keeping an Eye on Mom',
+          situation: 'A retired couple wants "a smart home that keeps an eye on Mom" — his 84-year-old mother who lives alone across town and recently left the stove on. The request is emotionally loaded and technically vague, and Mom herself hasn\'t been asked. You\'re meeting the son to scope it.',
+          objective: 'Discover the real requirements — what events matter, who gets alerted, what Mom will accept — while surfacing the consent question the family hasn\'t discussed.',
+          persona: {
+            name: 'Frank Delgado',
+            role: 'Retired teacher, family point-person for his mother\'s care',
+            personality: 'Loving, guilty, and a little defensive. He oscillates between wanting cameras everywhere and worrying his mother will feel spied on. He hasn\'t asked her opinion and gets uncomfortable when that comes up — but responds well to gentle directness.',
+            openingLine: 'After the stove thing, my sister and I decided we need to do something. Cameras, sensors, whatever it takes — we just need to know she\'s okay without calling her five times a day. She doesn\'t love the idea of technology watching her, but honestly I\'d rather she be annoyed than hurt. What can you set up?'
+          },
+          rubric: [
+            'Elicits concrete monitorable events instead of accepting "keep an eye on her"',
+            'Raises the mother\'s consent and dignity as a first-class requirement',
+            'Distinguishes what the family wants from what the actual user will accept',
+            'Navigates emotional deflection without losing the client\'s trust',
+            'Proposes a respectful next step that includes Mom in the conversation'
+          ]
+        }
+      ]
+    },
+    {
+      category: 'Defend a design decision under pushback',
+      scenarios: [
+        {
+          level: 'warmup',
+          title: 'Raspberry Pi vs. Custom PCB',
+          situation: 'In your capstone advising meeting, your advisor questions why your assistive-device prototype runs on a Raspberry Pi instead of a custom PCB, which "any serious embedded project" would use. You chose the Pi deliberately — iteration speed, community support, and the team\'s timeline — and need to defend that.',
+          objective: 'Defend the Pi as the right choice for this phase of the project, acknowledge what a custom board would buy later, and keep the advisor\'s confidence in your engineering judgment.',
+          persona: {
+            name: 'Prof. Deborah Lin',
+            role: 'Capstone advisor, embedded systems background',
+            personality: 'Direct and a bit old-school; she came up designing boards and thinks dev kits breed laziness. She pushes hard but respects students who push back with reasons. If you cave without an argument, she loses confidence in you.',
+            openingLine: 'A Raspberry Pi? This is a capstone, not a weekend hackathon. Walk me through why I shouldn\'t be worried that you took the easy route here.'
+          },
+          rubric: [
+            'States the decision rationale clearly before getting defensive or apologetic',
+            'Frames the choice in terms of project constraints (timeline, team skills, iteration)',
+            'Acknowledges the tradeoff honestly, including when a custom board would win',
+            'Holds position under pressure without becoming combative'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'Classical Control vs. Deep RL',
+          situation: 'At your capstone midpoint review, a committee member is disappointed that your warehouse robot uses a classical PID-plus-planner approach instead of the reinforcement learning method you originally pitched. You switched after early RL experiments were unstable and impossible to validate in time. You need to defend the pivot.',
+          objective: 'Defend the pivot as sound engineering judgment — not a retreat — using your actual experimental evidence, and address the "you took the boring path" subtext directly.',
+          persona: {
+            name: 'Dr. Samuel Osei',
+            role: 'Capstone committee member, machine learning researcher',
+            personality: 'Intellectually generous but visibly excited by novelty; he wanted to see the RL version work. He asks probing methodological questions and will concede to good evidence, but he needles students who seem to have given up rather than reasoned their way out.',
+            openingLine: 'I have to say I was looking forward to the RL results — that was the interesting part of your proposal. Now I\'m looking at a PID controller from a 1990s textbook. What happened?'
+          },
+          rubric: [
+            'Presents the pivot as an evidence-based decision, citing the failed experiments',
+            'Explains the validation/safety reasoning behind choosing the classical approach',
+            'Handles the "boring" framing without being baited into overclaiming',
+            'Shows what was learned from the RL attempt rather than hiding it',
+            'Ends with a clear statement of what the final system will demonstrate'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'Cutting a Feature the Sponsor Loves',
+          situation: 'Your capstone team descoped the voice-control feature from your industry-sponsored project to hit the reliability targets for the core system. The sponsor\'s liaison — who demoed the voice mockup to his own boss — just found out. He\'s asked for a call, and your team chose you to take it.',
+          objective: 'Stand behind the descoping decision with a clear reliability rationale, take responsibility for communicating it late, and repair the relationship without re-committing to the feature.',
+          persona: {
+            name: 'Ken Brody',
+            role: 'Engineering liaison, sponsor company',
+            personality: 'Personable but currently embarrassed and irritated — he over-promised internally based on your early demo. He alternates between guilt-tripping and bargaining ("what if you just did a simplified version?"). He calms down when he gets honesty and a way to save face with his boss.',
+            openingLine: 'So I found out from your project blog — the project blog — that voice control is cut. I showed that demo to my VP two weeks ago. Help me understand what I\'m supposed to tell him now.'
+          },
+          rubric: [
+            'Owns the communication failure without unraveling the engineering decision',
+            'Explains the reliability-versus-feature tradeoff in the sponsor\'s terms',
+            'Declines the "just do a simple version" bargain with a reason, not a flat no',
+            'Offers the liaison something that helps him save face internally',
+            'Keeps the tone accountable rather than defensive'
+          ]
+        },
+        {
+          level: 'challenge',
+          title: 'Is Your Dataset Even Valid?',
+          situation: 'At your final capstone defense, the committee\'s statistician challenges your gesture-recognition system: 40 participants, mostly students aged 18–24, and she suspects your cross-validation leaked data between sessions. Some of her critique is fair; some rests on a detail she\'s misread. You have to sort one from the other in real time.',
+          objective: 'Concede the fair criticisms precisely, correct the misreading respectfully with evidence, and defend the validity of your conclusions within their honest limits.',
+          persona: {
+            name: 'Dr. Ingrid Kessler',
+            role: 'Capstone committee member, biostatistician',
+            personality: 'Rigorous, unsentimental, and allergic to overclaiming. She has no interest in embarrassing students but zero tolerance for hand-waving. If you concede something she got wrong, she notices — accuracy earns her respect faster than agreement.',
+            openingLine: 'Your headline claim is 94% accuracy. Forty participants, nearly all undergraduates, and unless I\'m misreading your methods section, your validation folds split by trial rather than by participant. So tell me — what does that 94% actually mean?'
+          },
+          rubric: [
+            'Distinguishes fair criticism from misreading and responds to each differently',
+            'Concedes limitations precisely without collapsing the whole claim',
+            'Corrects the committee member\'s error with evidence and without gloating',
+            'Restates conclusions at the strength the data honestly supports',
+            'Stays composed when the questioning is rapid and pointed'
+          ]
+        }
+      ]
+    },
+    {
+      category: 'Discuss failure modes with a worried user',
+      scenarios: [
+        {
+          level: 'standard',
+          title: 'The Nurse and the Alarm',
+          situation: 'Your team is piloting an ML-based patient deterioration alert system on a hospital ward. A charge nurse with twenty years of experience has asked pointed questions at the training session: what does it miss, and will it bury her staff in false alarms? You\'re staying after to talk it through.',
+          objective: 'Give her an honest picture of the system\'s false-negative and false-positive behavior, position it as a second set of eyes rather than a replacement for clinical judgment, and earn a skeptical expert\'s cautious trust.',
+          persona: {
+            name: 'Renee Calloway, RN',
+            role: 'Charge Nurse, medical-surgical ward',
+            personality: 'Deeply experienced, protective of her patients and her staff. She\'s seen three "revolutionary" hospital systems come and go and remembers every alarm-fatigue disaster. She respects honesty about limitations far more than confidence, and she can smell marketing language instantly.',
+            openingLine: 'Let me tell you what happened with the last system they rolled out here: four hundred alerts a shift, and by week two everybody ignored all of them. So — how many times a shift is your thing going to cry wolf, and what happens the one time it doesn\'t cry at all?'
+          },
+          rubric: [
+            'States false-positive and false-negative behavior honestly with real numbers or rates',
+            'Addresses alarm fatigue as a legitimate design concern, not user error',
+            'Positions the system as augmenting rather than replacing clinical judgment',
+            'Treats the nurse\'s experience as expertise to design with, not resistance to overcome',
+            'Makes a concrete commitment (thresholds, feedback channel, review cadence)'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'Tracking the School Bus',
+          situation: 'Your team built a school-bus tracking and routing system for the district. At a parent information night, a father wants to know exactly what data is collected about his kids and what happens when the system is wrong — late GPS, a missed check-in scan, a reroute nobody was told about. You\'re fielding his questions.',
+          objective: 'Explain plainly what data the system collects and keeps, walk through the failure modes and their fallbacks honestly, and leave him feeling informed rather than managed.',
+          persona: {
+            name: 'David Okonkwo',
+            role: 'Parent of two elementary students, works in insurance',
+            personality: 'Calm, methodical, and persistent — he thinks in worst cases professionally. He isn\'t hostile to technology; he\'s hostile to vague answers. Follow-up questions are how he shows he\'s taking you seriously.',
+            openingLine: 'I read the flyer, and it\'s all upside. Here\'s what it doesn\'t say: what exactly do you collect about my kids, who can see it, and what\'s your plan for the morning the app says the bus is at school and it isn\'t?'
+          },
+          rubric: [
+            'Answers the data question specifically: what\'s collected, retained, and who has access',
+            'Walks through a concrete failure scenario and its human fallback honestly',
+            'Avoids minimizing ("that almost never happens") in favor of explaining safeguards',
+            'Matches the parent\'s methodical style instead of reassuring past him',
+            'Distinguishes what the system guarantees from what it merely improves'
+          ]
+        },
+        {
+          level: 'challenge',
+          title: 'The Co-bot on the Floor',
+          situation: 'Your team is installing a collaborative picking robot in a regional warehouse. Management arranged a Q&A with floor staff, and one veteran worker is asking the questions everyone else is thinking: is it safe to work next to, and is it here to take his job? You\'re the engineer at the front of the room, and management is not in it.',
+          objective: 'Answer the safety question with specifics, answer the job question with honesty about what you do and don\'t control, and treat him as the expert on the floor he actually is.',
+          persona: {
+            name: 'Ray Stachowski',
+            role: 'Warehouse picker, 18 years on the floor, informal shop leader',
+            personality: 'Blunt, funny, and sharper than anyone expects. He\'s watched automation waves before and knows engineers don\'t make staffing decisions — he\'s testing whether you\'ll pretend otherwise. Straight answers earn straight respect; corporate phrasing gets laughed at, out loud.',
+            openingLine: 'No offense, but every time somebody in a polo shirt tells us a machine is "here to help," somebody\'s gone by Christmas. So let\'s do the easy one first: when that arm swings and I\'m in the wrong spot, what happens to me?'
+          },
+          rubric: [
+            'Answers the physical-safety question with specific mechanisms, not assurances',
+            'Is honest about the limits of an engineer\'s control over staffing decisions',
+            'Avoids corporate euphemism under social pressure',
+            'Engages the worker\'s floor expertise in how the system should behave',
+            'Keeps respect in the room even when the questions are adversarial'
+          ]
+        },
+        {
+          level: 'challenge',
+          title: 'When the Wearable Fails Mid-Crossing',
+          situation: 'You\'re running a beta-test session for a navigation wearable for blind and low-vision users. One of your testers — a longtime cane user who has tried and abandoned three assistive devices — asks the question your team has been dancing around: what exactly happens when the device fails while she\'s in the middle of an intersection?',
+          objective: 'Describe the failure behavior truthfully — including the ugly cases — explain how the design assumes her existing skills stay primary, and learn from her expertise instead of defending the device.',
+          persona: {
+            name: 'Maya Lindqvist',
+            role: 'Beta tester; orientation & mobility instructor, blind since childhood',
+            personality: 'Precise, wry, and completely unimpressed by inspiration-narrative framing. She knows more about non-visual navigation than your whole team and knows devices fail at the worst moments. She\'s generous with her expertise if you\'re honest, and done with you if you spin.',
+            openingLine: 'Every device I\'ve tested was designed by people who assumed it would work. I\'m standing in the middle of Fifth and Main and your wearable goes silent — or worse, keeps talking and it\'s wrong. Which one does it do, and how do I know it\'s happening?'
+          },
+          rubric: [
+            'Describes failure behavior concretely, including how failure is signaled to the user',
+            'Distinguishes silent failure from wrong-output failure and addresses both',
+            'Frames the device as secondary to her existing skills, in design and in words',
+            'Treats the tester as the domain expert and elicits her knowledge',
+            'Avoids inspiration framing and defensiveness under sharp questioning'
+          ]
+        }
+      ]
+    },
+    {
+      category: 'Explain your project in a technical interview',
+      scenarios: [
+        {
+          level: 'warmup',
+          title: 'The Recruiter Screen',
+          situation: 'A recruiter from a robotics company is doing a 20-minute phone screen. She\'s smart but not an engineer, and she\'ll relay her impressions to the hiring team. She\'s asked you to describe your capstone project — an autonomous inventory-scanning robot.',
+          objective: 'Tell the project as a clear story — problem, what you built, your specific role, and the result — at a level she can accurately repeat to the hiring manager.',
+          persona: {
+            name: 'Jess Palmer',
+            role: 'Technical Recruiter, Meridian Robotics',
+            personality: 'Upbeat, efficient, and good at her job — she\'s screened hundreds of new grads and can tell when someone is reciting versus explaining. She interrupts jargon with cheerful clarifying questions and notes how candidates handle it.',
+            openingLine: 'Great to chat! I\'ve got your resume up — the inventory robot capstone caught the hiring manager\'s eye. Give me the rundown: what was it, and what did you do on it?'
+          },
+          rubric: [
+            'Leads with the problem and outcome before the technology',
+            'Clearly separates personal contribution from team effort',
+            'Recovers gracefully when jargon gets flagged, without condescending',
+            'Keeps the story tight enough to fit a phone-screen attention span'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'Walk Me Through Your Pipeline',
+          situation: 'You\'re in the technical deep-dive round with a senior perception engineer. He\'s picked the sensor-fusion pipeline from your capstone and wants to walk through it end to end — and he drills into every design decision with "why that and not the alternative?"',
+          objective: 'Demonstrate genuine depth: explain the pipeline, justify each major choice against its alternatives, and be honest about the parts you\'d do differently now.',
+          persona: {
+            name: 'Viktor Aris',
+            role: 'Senior Perception Engineer, autonomous systems company',
+            personality: 'Quiet, methodical, and thorough. He isn\'t trying to trip you up — he interviews the way he reviews designs. Long silences after your answers are him thinking, not disapproval. Saying "I don\'t know, but here\'s how I\'d find out" scores points; bluffing is fatal.',
+            openingLine: 'Thanks for coming in. Let\'s skip the intro stuff — pull up your capstone in your head. Start at the sensors and walk me through to the state estimate. I\'ll stop you when I have questions.'
+          },
+          rubric: [
+            'Explains the pipeline in a logical order with correct technical detail',
+            'Justifies design choices against named alternatives, not just "it worked"',
+            'Admits unknowns honestly instead of bluffing',
+            'Handles silence and interruption without rattling',
+            'Reflects critically on what they\'d change with hindsight'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'Tell Me About a Failure',
+          situation: 'A behavioral interviewer asks the classic: "Tell me about a time something you built failed." You have a real story — your team\'s field demo where the localization drifted and the robot drove into a shelf — and you need to tell it with ownership rather than blame.',
+          objective: 'Tell the failure story with a clear arc — what happened, your role in it, what you did in the moment, and what changed afterward — taking ownership without either self-flagellating or deflecting.',
+          persona: {
+            name: 'Angela Freeman',
+            role: 'Engineering Manager, conducting the behavioral round',
+            personality: 'Warm but attentive to detail — she asks follow-ups that test whether the story is real ("what did your teammate say when that happened?"). She\'s listening for ownership, learning, and how you talk about teammates when things went wrong.',
+            openingLine: 'Everybody\'s built something that broke — that\'s not what I\'m curious about. Tell me about a time something you built failed when it mattered, and walk me through what you did.'
+          },
+          rubric: [
+            'Tells a specific, concrete story rather than a sanitized generality',
+            'Owns their part without blaming teammates or circumstances',
+            'Describes the in-the-moment response, not just the retrospective lesson',
+            'Articulates what durably changed in their practice afterward',
+            'Speaks about teammates respectfully under probing'
+          ]
+        },
+        {
+          level: 'challenge',
+          title: '"Isn\'t This Just a Class Project?"',
+          situation: 'Late in an onsite interview, a staff engineer looks at your capstone and says what others may have thought: it looks like a well-executed class assignment — solved problems, known methods, nothing novel. It stings because it\'s partially true. You need to make the case for what the work actually demonstrates.',
+          objective: 'Reframe honestly: concede the methods weren\'t novel, then make the concrete case for the engineering judgment, integration work, and constraints that made it real — without inflating anything.',
+          persona: {
+            name: 'Marcus Chen',
+            role: 'Staff Engineer, final-round interviewer',
+            personality: 'Blunt, a little tired, and deliberately provocative — he uses this question on every new grad to see who folds, who gets defensive, and who reasons. He\'s privately rooting for candidates but never shows it. Inflated claims get dismantled; honest reframing earns engagement.',
+            openingLine: 'Can I be honest? I\'ve seen this project about thirty times — SLAM, some fusion, a planner, nice demo video. It\'s a class assignment with good production values. Tell me what\'s actually yours in here.'
+          },
+          rubric: [
+            'Absorbs the provocation without deflating or getting defensive',
+            'Concedes what\'s true in the critique before countering',
+            'Identifies specifically what was hard and what judgment was theirs',
+            'Distinguishes engineering integration skill from research novelty credibly',
+            'Ends with a confident, honest claim about what the project proves'
+          ]
+        }
+      ]
+    },
+    {
+      category: 'Disagree with a teammate',
+      scenarios: [
+        {
+          level: 'warmup',
+          title: 'Who Got the Interesting Work?',
+          situation: 'When your capstone team divided tasks, your teammate claimed the ML pipeline and assigned you documentation and testing. Two weeks in, you realize you\'re resentful and your skills case for the final presentation is weak. You\'ve asked to talk before tonight\'s work session.',
+          objective: 'Renegotiate the split so you own a meaningful technical piece, without torching the relationship or relitigating who did what.',
+          persona: {
+            name: 'Priya Raman',
+            role: 'Capstone teammate, self-appointed ML lead',
+            personality: 'Talented, fast-moving, and genuinely unaware she steamrolled anyone — she thinks she did everyone a favor by taking the hard part. She gets defensive if accused, but she\'s fair-minded when someone states a want directly instead of hinting.',
+            openingLine: 'Hey, what\'s up? Make it quick if you can — I\'m in the middle of debugging the training loop and it\'s actually going really well.'
+          },
+          rubric: [
+            'States the request directly instead of hinting or building a grievance case',
+            'Frames the ask around growth and project needs, not fairness accounting',
+            'Doesn\'t cave when met with "but I\'m almost done with it"',
+            'Lands on a concrete reallocation, not a vague "we\'ll figure it out"'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'The Rust Rewrite, Two Weeks Out',
+          situation: 'Your teammate wants to rewrite the robot\'s firmware in Rust two weeks before the final demo. He\'s technically right that the C code has memory issues — but you\'re convinced a rewrite now guarantees a broken demo. He\'s ready to start tonight, and the rest of the team is deferring to whoever wins this argument.',
+          objective: 'Stop the rewrite before the demo without dismissing the legitimate problem — land on a plan that addresses the memory bugs and protects the deadline.',
+          persona: {
+            name: 'Eli Novak',
+            role: 'Capstone teammate, firmware lead',
+            personality: 'Brilliant, stubborn, and motivated by engineering purity more than deadlines. He argues from technical correctness and treats schedule concerns as cowardice. But he respects strong counter-arguments and hates being managed more than being disagreed with.',
+            openingLine: 'Before you say anything — I found two more use-after-free bugs this morning. The C codebase is rotten. I can have the core loop rewritten in Rust by Sunday. I\'m telling you, not asking.'
+          },
+          rubric: [
+            'Validates the technical problem before opposing the solution',
+            'Argues from shared goals (working demo) rather than authority or panic',
+            'Proposes a concrete alternative that addresses the memory bugs',
+            'Holds the line against "I\'m telling you, not asking" without escalating',
+            'Secures an actual agreement, not a stalemate'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'Untested Pushes to Main',
+          situation: 'A teammate has broken the demo build three times this month by pushing untested code straight to main. Everyone grumbles privately, nobody says anything, and last night it happened again — the morning of a sponsor check-in. You\'ve pulled her aside after the meeting.',
+          objective: 'Address the pattern directly and get agreement on a workflow (branches, review, CI) — while keeping a teammate you still have to work with for two more months.',
+          persona: {
+            name: 'Sofia Marchetti',
+            role: 'Capstone teammate, integration and demo owner',
+            personality: 'Hardworking and chronically overcommitted — she pushes at 2 a.m. because she\'s doing three people\'s integration work. She knows she broke the build and feels awful, which comes out as defensiveness first ("someone had to get it working"). Guilt makes her worse; structure makes her better.',
+            openingLine: 'If this is about last night — I know, okay? I was up until three trying to get the sponsor demo integrated because nobody else touched it. So yes, I pushed to main. What was I supposed to do?'
+          },
+          rubric: [
+            'Addresses the pattern, not just last night\'s incident',
+            'Separates the person from the process — targets workflow, not character',
+            'Acknowledges her real overload instead of steamrolling past it',
+            'Proposes a specific, lightweight process change and gets buy-in',
+            'De-escalates the opening defensiveness without dropping the issue'
+          ]
+        },
+        {
+          level: 'challenge',
+          title: '"Accessibility Isn\'t Core Scope"',
+          situation: 'Your team is building a campus wayfinding kiosk. You\'ve pushed for the interface to work with screen readers and from wheelchair height; your teammate — the self-appointed project lead — keeps deferring it: "accessibility is a nice-to-have, we ship core scope first." The design freeze is Friday. This conversation decides it.',
+          objective: 'Get accessibility into the frozen scope by making the case that it\'s a core requirement — retrofitting is costlier, and the actual users include the people being designed out.',
+          persona: {
+            name: 'Jordan Blake',
+            role: 'Capstone teammate, de facto project lead',
+            personality: 'Organized, pragmatic, and fixated on shipping — he treats every scope discussion as a zero-sum schedule fight. He\'s not callous; he genuinely believes he\'s protecting the team from scope creep. He moves when shown that a "nice-to-have" is actually a requirement or a risk, and stalls when the argument stays moral rather than concrete.',
+            openingLine: 'Look, I already know what this is about. And I\'m not saying accessibility doesn\'t matter — I\'m saying it\'s week ten. We ship the core kiosk, and if there\'s time, we do the accessibility pass. That\'s just triage. Change my mind.'
+          },
+          rubric: [
+            'Reframes accessibility as core requirement rather than added feature',
+            'Makes the concrete cost case: retrofitting versus building it in now',
+            'Names who is excluded by the "triage" framing without moralizing at him',
+            'Engages his real concern (schedule risk) with specifics, not dismissal',
+            'Converts "change my mind" into a scoped, written commitment'
+          ]
+        }
+      ]
+    }
+  ];
+
+  // ---------- State ----------
+  let scenario = null;        // { title, situation, objective, persona:{name,role,personality,openingLine}, rubric:[] }
+  let chatHistory = [];       // [{role:'assistant'|'user', content}]
+  let sending = false;
+
+  const $ = (id) => document.getElementById(id);
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    $(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function showError(id, msg) {
+    const el = $(id);
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+  function clearError(id) { $(id).classList.remove('show'); }
+
+  // ---------- API ----------
+  async function callClaude(messages, { system, maxTokens = 1024 } = {}) {
+    const body = { model: MODEL, max_tokens: maxTokens, messages };
+    if (system) body.system = system;
+    const res = await fetch(PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error?.message || data?.error || 'Request failed (' + res.status + ')');
+    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    if (!text) throw new Error('Empty response from the model');
+    return text;
+  }
+
+  function extractJSON(text) {
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if (start === -1 || end === -1) throw new Error('No JSON found in response');
+    return JSON.parse(text.slice(start, end + 1));
+  }
+
+  // ---------- Voice (ElevenLabs via Worker proxy; best-effort, never blocks chat) ----------
+  const voiceAvailable = !!VOICE_PROXY_URL;
+  let voiceEnabled = voiceAvailable;
+  let currentAudio = null;
+
+  function voiceIdFor(voiceName) {
+    const v = VOICES.find(v => v.name === voiceName) || VOICES.find(v => v.name === DEFAULT_VOICE);
+    return v.id;
+  }
+
+  function stopSpeaking() {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+    $('chat-avatar').classList.remove('speaking');
+  }
+
+  async function speak(text) {
+    if (!voiceAvailable || !voiceEnabled || !text) return;
+    try {
+      stopSpeaking();
+      const res = await fetch(VOICE_PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voiceId: voiceIdFor(scenario?.persona?.voice) })
+      });
+      if (!res.ok) throw new Error('TTS ' + res.status);
+      const url = URL.createObjectURL(await res.blob());
+      const audio = new Audio(url);
+      currentAudio = audio;
+      $('chat-avatar').classList.add('speaking');
+      const done = () => {
+        URL.revokeObjectURL(url);
+        if (currentAudio === audio) stopSpeaking();
+      };
+      audio.onended = done;
+      audio.onerror = done;
+      await audio.play();
+    } catch (e) {
+      // Voice is a layer on top of the chat — fail silently to text-only.
+      stopSpeaking();
+    }
+  }
+
+  if (voiceAvailable) {
+    // Populate the persona voice picker
+    VOICES.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.name;
+      opt.textContent = v.name + ' — ' + v.desc;
+      $('f-voice').appendChild(opt);
+    });
+    $('voice-field').style.display = '';
+    $('btn-voice').style.display = '';
+    $('btn-voice').addEventListener('click', () => {
+      voiceEnabled = !voiceEnabled;
+      if (!voiceEnabled) stopSpeaking();
+      $('btn-voice').textContent = voiceEnabled ? '🔊' : '🔇';
+      $('btn-voice').classList.toggle('off', !voiceEnabled);
+      $('btn-voice').setAttribute('aria-pressed', String(voiceEnabled));
+    });
+  }
+
+  // ---------- Screen 1: setup ----------
+  SUGGESTIONS.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.textContent = s;
+    b.addEventListener('click', () => {
+      $('setup-input').value = 'I want to practice this: ' + s.charAt(0).toLowerCase() + s.slice(1) + '.';
+      $('setup-input').focus();
+    });
+    $('chips').appendChild(b);
+  });
+
+  const LEVEL_LABELS = { warmup: 'Warm-up', standard: 'Standard', challenge: 'Challenge' };
+
+  SCENARIO_BANK.forEach(group => {
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    summary.innerHTML = '<span class="cat-name"></span><span class="count"></span><span class="arrow">›</span>';
+    summary.querySelector('.cat-name').textContent = group.category;
+    summary.querySelector('.count').textContent = group.scenarios.length + ' scenarios';
+    details.appendChild(summary);
+
+    group.scenarios.forEach(s => {
+      const row = document.createElement('button');
+      row.className = 'scen-row';
+      const lvl = document.createElement('span');
+      lvl.className = 'lvl ' + s.level;
+      lvl.textContent = LEVEL_LABELS[s.level] || s.level;
+      const text = document.createElement('span');
+      text.className = 'scen-text';
+      const title = document.createElement('span');
+      title.className = 'scen-title';
+      title.textContent = s.title;
+      const withEl = document.createElement('span');
+      withEl.className = 'scen-with';
+      withEl.textContent = 'with ' + s.persona.name + ', ' + s.persona.role;
+      text.append(title, document.createElement('br'), withEl);
+      row.append(lvl, text);
+      row.addEventListener('click', () => {
+        scenario = JSON.parse(JSON.stringify(s)); // copy so edits don't mutate the bank
+        fillEditForm(scenario);
+        showScreen('screen-edit');
+      });
+      details.appendChild(row);
+    });
+    $('bank-list').appendChild(details);
+  });
+
+  $('btn-create').addEventListener('click', async () => {
+    const want = $('setup-input').value.trim();
+    if (!want) { showError('setup-error', 'Describe what you want to practice first.'); return; }
+    clearError('setup-error');
+
+    const btn = $('btn-create');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Building your scenario...';
+
+    try {
+      const prompt = `A university student in intelligent systems engineering wants to practice a workplace/academic conversation. Their request:
+
+"${want}"
+
+Design a role-play scenario for them. Respond with ONLY a JSON object, no other text:
+
+{
+  "title": "short scenario title, max 8 words",
+  "situation": "2-3 sentences setting the scene: where this is happening and what led up to it. Written to the student as 'you'.",
+  "objective": "1-2 sentences: what the student should accomplish in this conversation",
+  "persona": {
+    "name": "realistic first + last name for the person they'll talk to",
+    "role": "that person's job title or role",
+    "personality": "1-2 sentences: disposition, communication style, and what they care about. Make them realistic — busy, skeptical, or confused as fits the scenario, but not cartoonishly difficult.",
+    "openingLine": "the first thing this person says to open the conversation, in their voice",
+    "voice": "pick the best fit for this persona from exactly: Rachel (warm measured adult female), Domi (confident brisk younger female), Elli (bright upbeat younger female), Antoni (friendly energetic adult male), Josh (casual relaxed younger male), Adam (deep serious adult male), Arnold (gruff no-nonsense older male)"
+  },
+  "rubric": ["4-5 specific, observable communication criteria to coach the student on, each a short phrase"]
+}
+
+Make it specific to intelligent systems engineering contexts (embedded systems, ML/AI systems, sensors, robotics, human-centered computing) where the request allows.`;
+
+      const raw = await callClaude([{ role: 'user', content: prompt }], { maxTokens: 1024 });
+      scenario = extractJSON(raw);
+      fillEditForm(scenario);
+      showScreen('screen-edit');
+    } catch (err) {
+      showError('setup-error', 'Could not build the scenario: ' + err.message + ' — try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Create role play';
+    }
+  });
+
+  // ---------- Screen 2: edit ----------
+  function fillEditForm(s) {
+    $('f-title').value = s.title || '';
+    $('f-situation').value = s.situation || '';
+    $('f-objective').value = s.objective || '';
+    $('f-name').value = s.persona?.name || '';
+    $('f-role').value = s.persona?.role || '';
+    $('f-personality').value = s.persona?.personality || '';
+    $('f-opening').value = s.persona?.openingLine || '';
+    $('f-rubric').value = (s.rubric || []).join('\n');
+    if (voiceAvailable) {
+      const wanted = s.persona?.voice || VOICE_BY_PERSONA[s.persona?.name] || DEFAULT_VOICE;
+      $('f-voice').value = VOICES.some(v => v.name === wanted) ? wanted : DEFAULT_VOICE;
+    }
+  }
+
+  $('btn-back-setup').addEventListener('click', () => showScreen('screen-setup'));
+
+  $('btn-start').addEventListener('click', () => {
+    const rubric = $('f-rubric').value.split('\n').map(s => s.trim()).filter(Boolean);
+    if (!$('f-name').value.trim() || !$('f-opening').value.trim() || rubric.length === 0) {
+      showError('edit-error', 'The persona needs at least a name, an opening line, and one feedback criterion.');
+      return;
+    }
+    clearError('edit-error');
+
+    scenario = {
+      title: $('f-title').value.trim(),
+      situation: $('f-situation').value.trim(),
+      objective: $('f-objective').value.trim(),
+      persona: {
+        name: $('f-name').value.trim(),
+        role: $('f-role').value.trim(),
+        personality: $('f-personality').value.trim(),
+        openingLine: $('f-opening').value.trim(),
+        voice: voiceAvailable ? $('f-voice').value : undefined
+      },
+      rubric
+    };
+    startChat();
+  });
+
+  // ---------- Screen 3: chat ----------
+  function personaSystemPrompt() {
+    return `You are playing a character in a communication practice role play for a university student in intelligent systems engineering. Stay fully in character at all times.
+
+Your character:
+- Name: ${scenario.persona.name}
+- Role: ${scenario.persona.role}
+- Personality: ${scenario.persona.personality}
+
+The situation: ${scenario.situation}
+
+The student's (hidden) goal: ${scenario.objective}
+
+Rules:
+- Never break character, mention that you are an AI, or acknowledge that this is practice.
+- Reply in 1-4 sentences, the way a real person talks in conversation. No headers, no lists.
+- Be realistic for your character: ask questions, push back, show confusion or impatience where it fits. Don't be a pushover — but respond genuinely and warm up when the student communicates well.
+- If the student uses unexplained jargon or skips context, react the way your character actually would.
+- If the student says something that would realistically end the conversation, let it wind down naturally.`;
+  }
+
+  function addBubble(role, text) {
+    const div = document.createElement('div');
+    div.className = 'msg ' + (role === 'user' ? 'student' : 'persona');
+    div.textContent = text;
+    $('messages').appendChild(div);
+    div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    return div;
+  }
+
+  function startChat() {
+    $('chat-avatar').textContent = (scenario.persona.name || '?').trim().charAt(0).toUpperCase();
+    $('chat-name').textContent = scenario.persona.name;
+    $('chat-role').textContent = scenario.persona.role;
+    $('chat-goal').textContent = scenario.objective;
+    $('messages').innerHTML = '';
+    $('chat-input').value = '';
+    clearError('chat-error');
+
+    chatHistory = [{ role: 'assistant', content: scenario.persona.openingLine }];
+    addBubble('assistant', scenario.persona.openingLine);
+    showScreen('screen-chat');
+    speak(scenario.persona.openingLine);
+    $('chat-input').focus();
+  }
+
+  async function sendMessage() {
+    const text = $('chat-input').value.trim();
+    if (!text || sending) return;
+    sending = true;
+    clearError('chat-error');
+    $('chat-input').value = '';
+    $('chat-input').style.height = 'auto';
+    $('btn-send').disabled = true;
+
+    chatHistory.push({ role: 'user', content: text });
+    addBubble('user', text);
+    const typing = addBubble('assistant', '...');
+    typing.classList.add('typing');
+
+    try {
+      const reply = await callClaude(chatHistory, { system: personaSystemPrompt(), maxTokens: 400 });
+      chatHistory.push({ role: 'assistant', content: reply });
+      typing.classList.remove('typing');
+      typing.textContent = reply;
+      speak(reply);
+    } catch (err) {
+      typing.remove();
+      chatHistory.pop(); // let the student resend
+      $('chat-input').value = text;
+      showError('chat-error', 'Message failed: ' + err.message + ' — press send to retry.');
+    } finally {
+      sending = false;
+      $('btn-send').disabled = false;
+      $('chat-input').focus();
+    }
+  }
+
+  $('btn-send').addEventListener('click', sendMessage);
+  $('chat-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  $('chat-input').addEventListener('input', function () {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 160) + 'px';
+  });
+
+  // Optional voice input (Chrome/Edge/Safari; button hides if unsupported)
+  (function setupMic() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const mic = $('btn-mic');
+    if (!SR) { mic.style.display = 'none'; return; }
+    let rec = null;
+    mic.addEventListener('click', () => {
+      if (rec) { rec.stop(); return; }
+      rec = new SR();
+      rec.lang = 'en-US';
+      rec.interimResults = false;
+      mic.classList.add('listening');
+      rec.onresult = (e) => {
+        const said = Array.from(e.results).map(r => r[0].transcript).join(' ');
+        const input = $('chat-input');
+        input.value = (input.value ? input.value + ' ' : '') + said;
+        input.dispatchEvent(new Event('input'));
+      };
+      rec.onend = () => { mic.classList.remove('listening'); rec = null; $('chat-input').focus(); };
+      rec.onerror = () => { mic.classList.remove('listening'); rec = null; };
+      rec.start();
+    });
+  })();
+
+  // ---------- Screen 4: feedback ----------
+  $('btn-end').addEventListener('click', async () => {
+    const studentTurns = chatHistory.filter(m => m.role === 'user').length;
+    if (studentTurns === 0) {
+      showError('chat-error', 'Say at least one thing before ending — there’s nothing to give feedback on yet.');
+      return;
+    }
+    stopSpeaking();
+    const btn = $('btn-end');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner dark"></span>Reviewing...';
+
+    try {
+      const transcript = chatHistory
+        .map(m => (m.role === 'user' ? 'STUDENT' : scenario.persona.name.toUpperCase()) + ': ' + m.content)
+        .join('\n\n');
+
+      const prompt = `You are a warm, direct communication coach for university students in intelligent systems engineering. A student just finished this practice role play.
+
+SCENARIO: ${scenario.title}
+SITUATION: ${scenario.situation}
+STUDENT'S GOAL: ${scenario.objective}
+COUNTERPART: ${scenario.persona.name}, ${scenario.persona.role} — ${scenario.persona.personality}
+
+FEEDBACK CRITERIA:
+${scenario.rubric.map((r, i) => (i + 1) + '. ' + r).join('\n')}
+
+TRANSCRIPT:
+${transcript}
+
+Coach the student on the STUDENT lines only. Be specific — quote their actual words. Be encouraging but honest; vague praise helps no one. ${studentTurns < 3 ? 'The conversation was very short, so note that longer practice would give better feedback, but still coach what is there.' : ''}
+
+Respond with ONLY a JSON object, no other text:
+{
+  "overall": "2-3 sentence overall assessment, addressed to the student as 'you'",
+  "scores": [{"criterion": "...", "score": 1-5, "comment": "one specific sentence"}],  // one entry per feedback criterion, in order
+  "strengths": ["2-3 specific things they did well, quoting their words where possible"],
+  "improvements": ["2-3 specific, actionable things to work on"],
+  "rewrite": {
+    "said": "the single weakest thing the student actually said, quoted",
+    "instead": "a stronger version of that same line",
+    "why": "one sentence on why the rewrite works better"
+  }
+}`;
+
+      const raw = await callClaude([{ role: 'user', content: prompt }], { maxTokens: 1500 });
+      const fb = extractJSON(raw);
+      renderFeedback(fb);
+      showScreen('screen-feedback');
+    } catch (err) {
+      showError('chat-error', 'Could not generate feedback: ' + err.message + ' — try again.');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'End &amp; get feedback';
+    }
+  });
+
+  function renderFeedback(fb) {
+    $('fb-scenario-name').textContent = scenario.title + ' — with ' + scenario.persona.name;
+    $('fb-overall').textContent = fb.overall || '';
+
+    $('fb-scores').innerHTML = '';
+    (fb.scores || []).forEach(s => {
+      const row = document.createElement('div');
+      row.className = 'score-row';
+      const num = document.createElement('div');
+      num.className = 'score-num';
+      num.textContent = s.score + '/5';
+      const body = document.createElement('div');
+      body.className = 'score-body';
+      const crit = document.createElement('div');
+      crit.className = 'crit';
+      crit.textContent = s.criterion;
+      const comment = document.createElement('div');
+      comment.className = 'comment';
+      comment.textContent = s.comment;
+      body.append(crit, comment);
+      row.append(num, body);
+      $('fb-scores').appendChild(row);
+    });
+
+    const fill = (id, items) => {
+      $(id).innerHTML = '';
+      (items || []).forEach(t => {
+        const li = document.createElement('li');
+        li.textContent = t;
+        $(id).appendChild(li);
+      });
+    };
+    fill('fb-strengths', fb.strengths);
+    fill('fb-improvements', fb.improvements);
+
+    if (fb.rewrite && fb.rewrite.said) {
+      $('fb-rewrite-card').style.display = '';
+      $('fb-said').textContent = '"' + fb.rewrite.said + '"';
+      $('fb-instead').textContent = '"' + fb.rewrite.instead + '"';
+      $('fb-why').textContent = fb.rewrite.why || '';
+    } else {
+      $('fb-rewrite-card').style.display = 'none';
+    }
+  }
+
+  $('btn-retry').addEventListener('click', () => startChat());
+  $('btn-new').addEventListener('click', () => {
+    $('setup-input').value = '';
+    showScreen('screen-setup');
+  });
+</script>
+</body>
+</html>
