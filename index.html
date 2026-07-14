@@ -424,6 +424,84 @@
   .icon-btn.mic:hover { color: var(--text); border-color: var(--text-tertiary); }
   .icon-btn.mic.listening { background: #fde8e8; color: #c0392b; border-color: #e8b4b4; }
 
+  /* ---------- Voice call screen ---------- */
+  .call-title {
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+  }
+  .call-timer {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+    margin: 4px 0 22px;
+  }
+  .call-stage {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 44px 20px;
+  }
+  .call-card { flex: 1; max-width: 250px; text-align: center; }
+  .call-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.7rem;
+  }
+  .call-avatar.you {
+    background: var(--cream);
+    color: var(--accent);
+    font-size: 1rem;
+    border: 2px solid var(--border);
+  }
+  .call-avatar.persona { background: var(--gradient); color: #fff; }
+  .call-avatar.active { animation: speak-pulse 1.1s ease-in-out infinite; }
+  .call-name { font-weight: 600; }
+  .call-role {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .call-caption {
+    margin: 24px auto 0;
+    max-width: 580px;
+    min-height: 48px;
+    background: var(--bg-soft);
+    border-radius: 12px;
+    padding: 13px 18px;
+    text-align: center;
+    font-size: 0.96rem;
+    color: var(--text-secondary);
+    transition: background 0.2s;
+  }
+  .call-caption.student { background: var(--accent-tint); color: #5a1515; }
+  .call-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 26px;
+    flex-wrap: wrap;
+  }
+  @media (max-width: 540px) {
+    .call-stage { padding: 30px 12px; }
+    .call-avatar { width: 72px; height: 72px; font-size: 1.3rem; }
+    .call-avatar.you { font-size: 0.9rem; }
+  }
+
   /* ---------- Feedback screen ---------- */
   .overall {
     background: var(--bg-soft);
@@ -611,7 +689,38 @@
 
     <div class="btn-row">
       <button class="btn btn-secondary" id="btn-back-setup">Back</button>
-      <button class="btn btn-primary" id="btn-start">Start role play</button>
+      <button class="btn btn-secondary" id="btn-start">Start text chat</button>
+      <button class="btn btn-primary" id="btn-start-call" style="display: none;">Start voice session</button>
+    </div>
+  </section>
+
+  <!-- ============ Screen 3b: Voice session ============ -->
+  <section class="screen" id="screen-call">
+    <div class="call-title" id="call-title"></div>
+    <div class="call-timer" id="call-timer">00:00</div>
+
+    <div class="goal-banner"><strong>Your goal:</strong> <span id="call-goal"></span></div>
+
+    <div class="call-stage">
+      <div class="call-card">
+        <div class="call-avatar you" id="call-avatar-you">You</div>
+        <div class="call-name">You</div>
+        <div class="call-role">Student</div>
+      </div>
+      <div class="call-card">
+        <div class="call-avatar persona" id="call-avatar-p">?</div>
+        <div class="call-name" id="call-name-p"></div>
+        <div class="call-role" id="call-role-p"></div>
+      </div>
+    </div>
+
+    <div class="call-caption" id="call-caption" aria-live="polite">Connecting…</div>
+
+    <div class="error-banner" id="call-error"></div>
+
+    <div class="call-controls">
+      <button class="btn btn-secondary" id="btn-call-mic" style="display: none;">🎤 Tap to speak</button>
+      <button class="btn btn-primary" id="btn-call-end">End &amp; get feedback</button>
     </div>
   </section>
 
@@ -1268,7 +1377,9 @@
       currentAudio.pause();
       currentAudio = null;
     }
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
     $('chat-avatar').classList.remove('speaking');
+    $('call-avatar-p').classList.remove('active');
   }
 
   async function speak(text) {
@@ -1427,15 +1538,15 @@ Make it specific to intelligent systems engineering contexts (embedded systems, 
 
   $('btn-back-setup').addEventListener('click', () => showScreen('screen-setup'));
 
-  $('btn-start').addEventListener('click', () => {
+  function readScenarioFromForm() {
     const rubric = $('f-rubric').value.split('\n').map(s => s.trim()).filter(Boolean);
     if (!$('f-name').value.trim() || !$('f-opening').value.trim() || rubric.length === 0) {
       showError('edit-error', 'The persona needs at least a name, an opening line, and one feedback criterion.');
-      return;
+      return null;
     }
     clearError('edit-error');
 
-    scenario = {
+    return {
       title: $('f-title').value.trim(),
       situation: $('f-situation').value.trim(),
       objective: $('f-objective').value.trim(),
@@ -1448,7 +1559,24 @@ Make it specific to intelligent systems engineering contexts (embedded systems, 
       },
       rubric
     };
+  }
+
+  let lastMode = 'chat';
+
+  $('btn-start').addEventListener('click', () => {
+    const s = readScenarioFromForm();
+    if (!s) return;
+    scenario = s;
+    lastMode = 'chat';
     startChat();
+  });
+
+  $('btn-start-call').addEventListener('click', () => {
+    const s = readScenarioFromForm();
+    if (!s) return;
+    scenario = s;
+    lastMode = 'call';
+    startCall();
   });
 
   // ---------- Screen 3: chat ----------
@@ -1562,17 +1690,186 @@ Rules:
     });
   })();
 
+  // ---------- Screen 3b: voice session (LinkedIn-style call) ----------
+  const SRClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const canVoiceSession = !!SRClass && (voiceAvailable || 'speechSynthesis' in window);
+  if (canVoiceSession) {
+    $('btn-start-call').style.display = '';
+  } else {
+    // No speech recognition — text chat becomes the primary action
+    $('btn-start').classList.replace('btn-secondary', 'btn-primary');
+  }
+
+  let callActive = false;
+  let callRec = null;
+  let callTimerInterval = null;
+
+  // Speak text and ALWAYS call onDone exactly once — via ElevenLabs when the
+  // proxy is up, browser speechSynthesis otherwise, or a length-based safety
+  // timer if audio never finishes (muted tab, blocked autoplay, etc.).
+  function ttsSpeak(text, onDone) {
+    let called = false;
+    const done = () => {
+      if (called) return;
+      called = true;
+      clearTimeout(safety);
+      if (onDone) onDone();
+    };
+    const safety = setTimeout(done, Math.min(30000, 3000 + text.length * 90));
+
+    const fallbackSpeech = () => {
+      if (!('speechSynthesis' in window)) return; // safety timer will fire
+      try {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.onend = done;
+        u.onerror = done;
+        speechSynthesis.speak(u);
+      } catch { done(); }
+    };
+
+    if (voiceAvailable) {
+      fetch(VOICE_PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voiceId: voiceIdFor(scenario?.persona?.voice) })
+      })
+        .then(res => { if (!res.ok) throw new Error(); return res.blob(); })
+        .then(blob => {
+          const url = URL.createObjectURL(blob);
+          const audio = new Audio(url);
+          currentAudio = audio;
+          audio.onended = audio.onerror = () => { URL.revokeObjectURL(url); done(); };
+          return audio.play();
+        })
+        .catch(fallbackSpeech);
+    } else {
+      fallbackSpeech();
+    }
+  }
+
+  function callCaption(text, isStudent) {
+    const el = $('call-caption');
+    el.textContent = text;
+    el.classList.toggle('student', !!isStudent);
+  }
+
+  function startCallTimer() {
+    const started = Date.now();
+    clearInterval(callTimerInterval);
+    callTimerInterval = setInterval(() => {
+      const s = Math.floor((Date.now() - started) / 1000);
+      $('call-timer').textContent =
+        String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+    }, 500);
+    $('call-timer').textContent = '00:00';
+  }
+
+  function startCall() {
+    callActive = true;
+    $('call-title').textContent = scenario.title;
+    $('call-goal').textContent = scenario.objective;
+    $('call-avatar-p').textContent = (scenario.persona.name || '?').trim().charAt(0).toUpperCase();
+    $('call-name-p').textContent = scenario.persona.name;
+    $('call-role-p').textContent = scenario.persona.role;
+    $('btn-call-mic').style.display = 'none';
+    clearError('call-error');
+
+    chatHistory = [{ role: 'assistant', content: scenario.persona.openingLine }];
+    showScreen('screen-call');
+    startCallTimer();
+    speakPersona(scenario.persona.openingLine);
+  }
+
+  function speakPersona(text) {
+    if (!callActive) return;
+    callCaption(text, false);
+    $('btn-call-mic').style.display = 'none';
+    $('call-avatar-p').classList.add('active');
+    ttsSpeak(text, () => {
+      $('call-avatar-p').classList.remove('active');
+      if (callActive) startListening();
+    });
+  }
+
+  function startListening() {
+    if (!callActive) return;
+    clearError('call-error');
+    callCaption('Listening — go ahead…', true);
+    $('btn-call-mic').style.display = 'none';
+    $('call-avatar-you').classList.add('active');
+
+    let finalText = '';
+    const rec = new SRClass();
+    callRec = rec;
+    rec.lang = 'en-US';
+    rec.interimResults = true;
+    rec.onresult = (e) => {
+      let interim = '';
+      for (const r of e.results) {
+        if (r.isFinal) finalText += r[0].transcript;
+        else interim += r[0].transcript;
+      }
+      const heard = (finalText + ' ' + interim).trim();
+      if (heard) callCaption(heard, true);
+    };
+    rec.onend = () => {
+      callRec = null;
+      $('call-avatar-you').classList.remove('active');
+      if (!callActive) return;
+      const said = finalText.trim();
+      if (said) handleStudentTurn(said);
+      else showTapToSpeak('Didn’t catch that.');
+    };
+    rec.onerror = () => {}; // onend always follows
+    try { rec.start(); }
+    catch { showTapToSpeak('Microphone unavailable.'); }
+  }
+
+  function showTapToSpeak(note) {
+    if (!callActive) return;
+    callCaption((note ? note + ' ' : '') + 'Tap the button when you’re ready to speak.', true);
+    $('btn-call-mic').style.display = '';
+  }
+
+  $('btn-call-mic').addEventListener('click', () => startListening());
+
+  async function handleStudentTurn(said) {
+    callCaption(said, true);
+    chatHistory.push({ role: 'user', content: said });
+    try {
+      const reply = await callClaude(chatHistory, { system: personaSystemPrompt(), maxTokens: 400 });
+      chatHistory.push({ role: 'assistant', content: reply });
+      speakPersona(reply);
+    } catch (err) {
+      chatHistory.pop();
+      showError('call-error', 'Message failed: ' + err.message);
+      showTapToSpeak('Say that again —');
+    }
+  }
+
+  function cleanupCall() {
+    callActive = false;
+    clearInterval(callTimerInterval);
+    if (callRec) { try { callRec.abort(); } catch {} callRec = null; }
+    stopSpeaking();
+  }
+
   // ---------- Screen 4: feedback ----------
-  $('btn-end').addEventListener('click', async () => {
+  $('btn-end').addEventListener('click', () => finishSession('btn-end', 'chat-error', 'dark'));
+  $('btn-call-end').addEventListener('click', () => finishSession('btn-call-end', 'call-error', ''));
+
+  async function finishSession(btnId, errId, spinnerClass) {
     const studentTurns = chatHistory.filter(m => m.role === 'user').length;
     if (studentTurns === 0) {
-      showError('chat-error', 'Say at least one thing before ending — there’s nothing to give feedback on yet.');
+      showError(errId, 'Say at least one thing before ending — there’s nothing to give feedback on yet.');
       return;
     }
+    if (lastMode === 'call') cleanupCall();
     stopSpeaking();
-    const btn = $('btn-end');
+    const btn = $(btnId);
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner dark"></span>Reviewing...';
+    btn.innerHTML = '<span class="spinner ' + spinnerClass + '"></span>Reviewing...';
 
     try {
       const transcript = chatHistory
@@ -1612,12 +1909,12 @@ Respond with ONLY a JSON object, no other text:
       renderFeedback(fb);
       showScreen('screen-feedback');
     } catch (err) {
-      showError('chat-error', 'Could not generate feedback: ' + err.message + ' — try again.');
+      showError(errId, 'Could not generate feedback: ' + err.message + ' — try again.');
     } finally {
       btn.disabled = false;
       btn.innerHTML = 'End &amp; get feedback';
     }
-  });
+  }
 
   function renderFeedback(fb) {
     $('fb-scenario-name').textContent = scenario.title + ' — with ' + scenario.persona.name;
@@ -1664,7 +1961,7 @@ Respond with ONLY a JSON object, no other text:
     }
   }
 
-  $('btn-retry').addEventListener('click', () => startChat());
+  $('btn-retry').addEventListener('click', () => lastMode === 'call' ? startCall() : startChat());
   $('btn-new').addEventListener('click', () => {
     $('setup-input').value = '';
     showScreen('screen-setup');
