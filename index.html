@@ -719,7 +719,9 @@
     <div class="error-banner" id="call-error"></div>
 
     <div class="call-controls">
+      <button class="btn btn-secondary" id="btn-call-done" style="display: none;">✓ I&rsquo;m done speaking</button>
       <button class="btn btn-secondary" id="btn-call-mic" style="display: none;">🎤 Tap to speak</button>
+      <button class="btn btn-secondary" id="btn-call-text">⌨ Switch to text</button>
       <button class="btn btn-primary" id="btn-call-end">End &amp; get feedback</button>
     </div>
   </section>
@@ -734,6 +736,7 @@
       </div>
       <button class="voice-toggle" id="btn-voice" style="display: none;"
         title="Toggle spoken replies" aria-label="Toggle spoken replies" aria-pressed="true">🔊</button>
+      <button class="btn btn-secondary" id="btn-chat-voice" style="display: none;">🎙 Voice</button>
       <button class="btn btn-secondary" id="btn-end">End &amp; get feedback</button>
     </div>
 
@@ -1774,20 +1777,25 @@ Rules:
     return div;
   }
 
-  function startChat() {
+  // Render the chat screen from the current chatHistory — used both for a fresh
+  // start and when switching over from a voice session mid-conversation.
+  function enterChat() {
     $('chat-avatar').textContent = (scenario.persona.name || '?').trim().charAt(0).toUpperCase();
     $('chat-name').textContent = scenario.persona.name;
     $('chat-role').textContent = scenario.persona.role;
     $('chat-goal').textContent = scenario.objective;
     $('messages').innerHTML = '';
+    chatHistory.forEach(m => addBubble(m.role, m.content));
     $('chat-input').value = '';
     clearError('chat-error');
-
-    chatHistory = [{ role: 'assistant', content: scenario.persona.openingLine }];
-    addBubble('assistant', scenario.persona.openingLine);
     showScreen('screen-chat');
-    speak(scenario.persona.openingLine);
     $('chat-input').focus();
+  }
+
+  function startChat() {
+    chatHistory = [{ role: 'assistant', content: scenario.persona.openingLine }];
+    enterChat();
+    speak(scenario.persona.openingLine);
   }
 
   async function sendMessage() {
@@ -1919,18 +1927,27 @@ Rules:
     el.classList.toggle('student', !!isStudent);
   }
 
-  function startCallTimer() {
-    const started = Date.now();
+  // The timer survives mode switches: elapsed time accumulates in
+  // callElapsedBase whenever the call is paused (switch to text) or ended.
+  let callElapsedBase = 0;
+  let callTimerStarted = 0;
+
+  function startCallTimer(resume) {
+    if (!resume) callElapsedBase = 0;
+    callTimerStarted = Date.now();
     clearInterval(callTimerInterval);
-    callTimerInterval = setInterval(() => {
-      const s = Math.floor((Date.now() - started) / 1000);
+    const render = () => {
+      const s = Math.floor(callElapsedBase + (Date.now() - callTimerStarted) / 1000);
       $('call-timer').textContent =
         String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
-    }, 500);
-    $('call-timer').textContent = '00:00';
+    };
+    callTimerInterval = setInterval(render, 500);
+    render();
   }
 
-  function startCall() {
+  // Show the call screen for the current scenario/history — used both for a
+  // fresh voice session and when switching over from text chat mid-conversation.
+  function enterCall(resumeTimer) {
     callActive = true;
     $('call-title').textContent = scenario.title;
     $('call-goal').textContent = scenario.objective;
@@ -1938,11 +1955,15 @@ Rules:
     $('call-name-p').textContent = scenario.persona.name;
     $('call-role-p').textContent = scenario.persona.role;
     $('btn-call-mic').style.display = 'none';
+    $('btn-call-done').style.display = 'none';
     clearError('call-error');
-
-    chatHistory = [{ role: 'assistant', content: scenario.persona.openingLine }];
     showScreen('screen-call');
-    startCallTimer();
+    startCallTimer(resumeTimer);
+  }
+
+  function startCall() {
+    chatHistory = [{ role: 'assistant', content: scenario.persona.openingLine }];
+    enterCall(false);
     speakPersona(scenario.persona.openingLine);
   }
 
@@ -1950,6 +1971,7 @@ Rules:
     if (!callActive) return;
     callCaption(text, false);
     $('btn-call-mic').style.display = 'none';
+    $('btn-call-done').style.display = 'none';
     $('call-avatar-p').classList.add('active');
     ttsSpeak(text, () => {
       $('call-avatar-p').classList.remove('active');
@@ -1957,30 +1979,47 @@ Rules:
     });
   }
 
+  // Silence (ms) after the student stops talking before their turn is sent.
+  const SILENCE_BEFORE_SEND = 3000;
+
   function startListening() {
     if (!callActive) return;
     clearError('call-error');
-    callCaption('Listening — go ahead…', true);
+    callCaption('Listening — take your time. Pause for a few seconds, or tap “I’m done speaking,” to send.', true);
     $('btn-call-mic').style.display = 'none';
+    $('btn-call-done').style.display = '';
     $('call-avatar-you').classList.add('active');
 
     let finalText = '';
+    let silenceTimer = null;
     const rec = new SRClass();
     callRec = rec;
     rec.lang = 'en-US';
     rec.interimResults = true;
+    // Keep listening across natural pauses — we decide when the turn is over,
+    // not the recognizer's first moment of silence.
+    rec.continuous = true;
+    const armSilenceTimer = () => {
+      clearTimeout(silenceTimer);
+      silenceTimer = setTimeout(() => { try { rec.stop(); } catch {} }, SILENCE_BEFORE_SEND);
+    };
     rec.onresult = (e) => {
-      let interim = '';
+      // continuous mode accumulates results — rebuild the transcript each event
+      let fin = '', interim = '';
       for (const r of e.results) {
-        if (r.isFinal) finalText += r[0].transcript;
+        if (r.isFinal) fin += r[0].transcript;
         else interim += r[0].transcript;
       }
-      const heard = (finalText + ' ' + interim).trim();
+      finalText = fin;
+      const heard = (fin + ' ' + interim).trim();
       if (heard) callCaption(heard, true);
+      armSilenceTimer();
     };
     rec.onend = () => {
+      clearTimeout(silenceTimer);
       callRec = null;
       $('call-avatar-you').classList.remove('active');
+      $('btn-call-done').style.display = 'none';
       if (!callActive) return;
       const said = finalText.trim();
       if (said) handleStudentTurn(said);
@@ -1991,9 +2030,14 @@ Rules:
     catch { showTapToSpeak('Microphone unavailable.'); }
   }
 
+  $('btn-call-done').addEventListener('click', () => {
+    if (callRec) { try { callRec.stop(); } catch {} }
+  });
+
   function showTapToSpeak(note) {
     if (!callActive) return;
     callCaption((note ? note + ' ' : '') + 'Tap the button when you’re ready to speak.', true);
+    $('btn-call-done').style.display = 'none';
     $('btn-call-mic').style.display = '';
   }
 
@@ -2014,11 +2058,31 @@ Rules:
   }
 
   function cleanupCall() {
+    if (callActive) callElapsedBase += (Date.now() - callTimerStarted) / 1000;
     callActive = false;
     clearInterval(callTimerInterval);
     if (callRec) { try { callRec.abort(); } catch {} callRec = null; }
     stopSpeaking();
   }
+
+  // ---------- Mid-session mode switching ----------
+  if (canVoiceSession) $('btn-chat-voice').style.display = '';
+
+  $('btn-chat-voice').addEventListener('click', () => {
+    if (sending) return; // let the in-flight reply land first
+    stopSpeaking();
+    lastMode = 'call';
+    enterCall(true); // resume the running total on the call timer
+    const lastLine = [...chatHistory].reverse().find(m => m.role === 'assistant');
+    callCaption(lastLine ? lastLine.content : 'Your turn — go ahead.', false);
+    startListening();
+  });
+
+  $('btn-call-text').addEventListener('click', () => {
+    cleanupCall();
+    lastMode = 'chat';
+    enterChat();
+  });
 
   // ---------- Screen 4: feedback ----------
   $('btn-end').addEventListener('click', () => finishSession('btn-end', 'chat-error', 'dark'));
