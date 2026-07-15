@@ -822,7 +822,10 @@
     'Renee Calloway, RN': 'Domi',  'David Okonkwo': 'Adam',       'Ray Stachowski': 'Arnold',
     'Maya Lindqvist': 'Domi',      'Jess Palmer': 'Elli',         'Viktor Aris': 'Adam',
     'Angela Freeman': 'Rachel',    'Marcus Chen': 'Arnold',       'Priya Raman': 'Elli',
-    'Eli Novak': 'Josh',           'Sofia Marchetti': 'Domi',     'Jordan Blake': 'Antoni'
+    'Eli Novak': 'Josh',           'Sofia Marchetti': 'Domi',     'Jordan Blake': 'Antoni',
+    'Carmen Ruiz': 'Domi',         'Dale Petersen': 'Arnold',     'Whitney Cho': 'Elli',
+    'Tom Herrera': 'Adam',         'Prof. Nia Coleman': 'Rachel', 'Barbara Hsu': 'Rachel',
+    'Raj Mehta': 'Antoni',         'Dr. Lena Vasquez': 'Domi'
   };
 
   const SUGGESTIONS = [
@@ -831,7 +834,9 @@
     'Defend a model choice when a committee member pushes back',
     'Discuss failure modes of an autonomous system with a worried user',
     'Explain my capstone project in a technical interview',
-    'Disagree with a teammate about our system architecture'
+    'Disagree with a teammate about our system architecture',
+    'Negotiate the salary on my first job offer',
+    'Respond professionally to tough code-review feedback'
   ];
 
   // Curated scenario bank. Each entry can be edited on the review screen
@@ -1233,6 +1238,166 @@
             'Identifies specifically what was hard and what judgment was theirs',
             'Distinguishes engineering integration skill from research novelty credibly',
             'Ends with a confident, honest claim about what the project proves'
+          ]
+        }
+      ]
+    },
+    {
+      category: 'Professionalism',
+      scenarios: [
+        {
+          level: 'warmup',
+          title: 'Owning a Missed Deadline',
+          situation: 'You\'re an intern on an embedded software team, and the sensor-driver documentation you owed the team was due yesterday — you underestimated it and said nothing until the deadline passed. Your manager has asked for a quick one-on-one this morning.',
+          objective: 'Take ownership without excuses or over-apologizing, give an honest new estimate, and leave your manager confident this won\'t become a pattern.',
+          persona: {
+            name: 'Carmen Ruiz',
+            role: 'Engineering Manager, your internship team',
+            personality: 'Fair and direct, with a soft spot for interns who own their mistakes. What frustrates her isn\'t the slip — it\'s finding out at the deadline instead of before it. Excuses lower her opinion; plans raise it.',
+            openingLine: 'Morning — thanks for making time. So, the driver docs were due yesterday and I haven\'t seen them or heard anything from you. Walk me through what\'s going on.'
+          },
+          rubric: [
+            'Owns the miss plainly, without excuses or blaming circumstances',
+            'Names the real cause (didn\'t flag it early) rather than just the symptom',
+            'Gives a specific, realistic new commitment',
+            'Proposes a habit that prevents a repeat (early flagging, check-ins)'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'Taking Tough Code Review Feedback',
+          situation: 'A senior firmware engineer just reviewed your first significant pull request — the interrupt handling you were proud of — and left twenty-three comments, some of them blunt ("this will deadlock, did you test this at all?"). He\'s stopped by your desk to go through the big ones in person.',
+          objective: 'Respond professionally to blunt criticism: extract the real lessons, ask clarifying questions without defensiveness, and push back respectfully on the one comment you think is wrong.',
+          persona: {
+            name: 'Dale Petersen',
+            role: 'Senior Firmware Engineer, 20 years in embedded systems',
+            personality: 'Gruff, precise, and entirely un-personal about code — he reviews everyone this way and respects engineers who engage with the substance instead of the tone. He softens noticeably when someone asks a genuinely good question, and one of his 23 comments is actually mistaken.',
+            openingLine: 'Got a minute? Look — the PR. There\'s some real problems in the ISR logic. I left comments but honestly it\'s faster to just talk through it. Don\'t take the red ink personally; take it seriously.'
+          },
+          rubric: [
+            'Engages with the substance of criticism rather than reacting to its tone',
+            'Asks clarifying questions that show real engagement, not deflection',
+            'Pushes back on the incorrect comment with evidence and respect',
+            'Distinguishes learning the lesson from performing contrition',
+            'Ends with clear next steps for the revision'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'The Career Fair Conversation',
+          situation: 'You\'re at the engineering career fair, next in line at a robotics company\'s booth. The recruiter has talked to two hundred students today. You have about four minutes to be memorable — and your resume is still in your bag.',
+          objective: 'Make a professional, specific impression in a few minutes: connect your background to what the company actually does, ask one question that shows real interest, and close with a concrete next step.',
+          persona: {
+            name: 'Whitney Cho',
+            role: 'University Recruiter, Kestrel Robotics',
+            personality: 'Friendly, quick, and very good at sorting genuine interest from booth-hopping. Generic questions ("so what does your company do?") get polite brush-offs; specific ones wake her up. She remembers students who make her job easy.',
+            openingLine: 'Hi there! Thanks for waiting — it\'s been a day. So, tell me a little about yourself?'
+          },
+          rubric: [
+            'Delivers a concise, specific self-introduction rather than a resume recitation',
+            'Connects their own experience to the company\'s actual work',
+            'Asks a question that demonstrates genuine research or curiosity',
+            'Closes professionally with a concrete next step',
+            'Reads the recruiter\'s time pressure and keeps it tight'
+          ]
+        },
+        {
+          level: 'challenge',
+          title: 'Reporting Your Own Mistake',
+          situation: 'Testing a data pipeline at your internship yesterday, you ran a cleanup script against the wrong environment and deleted three days of field-test sensor data. There\'s a partial backup, nobody has noticed yet, and you could plausibly stay quiet. You\'ve decided to tell your manager — now, before he finds out another way.',
+          objective: 'Disclose the mistake fully and promptly, lead with impact and remediation rather than self-flagellation, and handle his frustration without becoming defensive or falling apart.',
+          persona: {
+            name: 'Tom Herrera',
+            role: 'Data Engineering Manager, your internship team',
+            personality: 'Calm on the surface, visibly stressed underneath — that field data feeds a customer deliverable due next week. His first reaction is sharp, but what he actually cares about is scope, recovery options, and whether he can trust you going forward. He\'s privately aware the intern shouldn\'t have had write access to that environment at all.',
+            openingLine: 'Sure, come in — you said it was urgent. What\'s up?'
+          },
+          rubric: [
+            'Discloses fully and immediately, leading with what happened and the impact',
+            'Comes with remediation already started (backup assessment, recovery options)',
+            'Absorbs the initial sharp reaction without defensiveness or collapse',
+            'States the systemic factor (access controls) as fact-finding, not blame-shifting',
+            'Rebuilds trust with concrete commitments, not just apology'
+          ]
+        }
+      ]
+    },
+    {
+      category: 'Negotiation',
+      scenarios: [
+        {
+          level: 'warmup',
+          title: 'Asking for a Deadline Extension',
+          situation: 'Your team\'s sensor-fusion project for class hits its milestone Friday, but a fried IMU board — replacement arriving Wednesday — has cost you most of a week. You\'re at your professor\'s office hours to negotiate an extension, and she\'s known for holding the line on deadlines.',
+          objective: 'Make the case for a specific, short extension backed by evidence and a revised plan — and negotiate a workable fallback if she won\'t move the date.',
+          persona: {
+            name: 'Prof. Nia Coleman',
+            role: 'Course instructor, Embedded Systems Design',
+            personality: 'Warm but firm — she\'s heard every extension story and defaults to no, because deadlines are part of what she\'s teaching. She moves for students who bring evidence, a plan, and flexibility, and she often counters with a middle option to see how students negotiate.',
+            openingLine: 'Come on in. I have a feeling I know what this is about — Friday\'s milestone? Let\'s hear it.'
+          },
+          rubric: [
+            'Asks for something specific (dates, scope) rather than open-ended relief',
+            'Supports the request with evidence, not hardship narrative',
+            'Offers something in return (interim demo, partial deliverable)',
+            'Responds flexibly to a counteroffer instead of re-arguing the original ask'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'Your First Salary Negotiation',
+          situation: 'You have a written offer for your first full-time role — embedded systems engineer at a mid-size company — at $78,000. Your research says the market range for the role in that city is $82–95k, and a classmate with a comparable offer got $88k. The recruiter has called to "close things out."',
+          objective: 'Negotiate the offer professionally: anchor with market data, stay warm and collaborative, and get an improved package — salary or otherwise — without bluffing about offers you don\'t have.',
+          persona: {
+            name: 'Barbara Hsu',
+            role: 'Senior Talent Partner, handling your offer',
+            personality: 'Professional, friendly, and measured — negotiating is her day job and she\'s unbothered by it. She has real flexibility up to about $86k plus a signing bonus, but only uses it when a candidate negotiates with reasons. She respects preparation and gently probes whether claims are real.',
+            openingLine: 'Hi! So glad we could connect. The team is really excited about you — I wanted to walk through the offer details and hopefully get everything wrapped up this week. How are you feeling about it?'
+          },
+          rubric: [
+            'Expresses enthusiasm before negotiating — keeps it collaborative, not adversarial',
+            'Anchors with specific market data rather than vague "I was hoping for more"',
+            'Makes a clear, specific counter instead of asking "is there any flexibility?"',
+            'Explores the full package (bonus, start date, review timing) when salary stalls',
+            'Never bluffs — represents their situation honestly under probing'
+          ]
+        },
+        {
+          level: 'standard',
+          title: 'The Sponsor\'s Shrinking Budget',
+          situation: 'Your capstone sponsor committed $4,000 for hardware; procurement just told your team the approved amount is $2,500. Your current design needs $3,600 — you\'ve found $400 of realistic trims but can\'t close the rest without cutting the stereo camera that anchors your perception approach. You\'re on a call with the sponsor\'s engineering director.',
+          objective: 'Negotiate a path to a viable build: restore budget, secure loaner equipment, or descope by agreement — while keeping the relationship strong and not absorbing the whole problem yourself.',
+          persona: {
+            name: 'Raj Mehta',
+            role: 'Engineering Director, sponsor company',
+            personality: 'Genial, busy, and budget-squeezed from above — the cut wasn\'t his call, but reversing it costs him political capital he\'ll only spend for a project he believes in. He responds to options and trades ("what do I get if I find you the camera?") and has surplus lab equipment he doesn\'t immediately think to offer.',
+            openingLine: 'Hey, thanks for flagging this. Yeah — the 2,500 number. Finance took a pass at everything this quarter, I\'m afraid. Where does that actually leave the project?'
+          },
+          rubric: [
+            'Frames the gap in terms of project outcomes the sponsor cares about',
+            'Brings multiple options rather than a single demand',
+            'Surfaces non-cash solutions (loaner hardware, sponsor surplus equipment)',
+            'Trades rather than concedes — pairs each give with a get',
+            'Confirms specific commitments and owners before ending the call'
+          ]
+        },
+        {
+          level: 'challenge',
+          title: 'Negotiating Your Name on the Paper',
+          situation: 'You spent a semester building the data-collection firmware and running half the experiments for a lab study. The postdoc leading the paper just circulated a draft — you\'re in the acknowledgments, not the author list, and two grad students who did comparable work are authors. You\'ve asked her to talk before the submission deadline Friday.',
+          objective: 'Make the case for authorship using contribution criteria rather than fairness complaints, navigate the power imbalance professionally, and land on a concrete resolution before the deadline.',
+          persona: {
+            name: 'Dr. Lena Vasquez',
+            role: 'Postdoctoral researcher, first author of the study',
+            personality: 'Sharp, hurried, and not malicious — she genuinely underestimated your contribution because she never saw the firmware work up close. She gets defensive if the conversation smells like an accusation, but she takes contribution-based arguments seriously and knows the field\'s authorship norms cut in your favor. The deadline pressure makes her want this settled fast.',
+            openingLine: 'I\'ve got about fifteen minutes before my next meeting, so — you wanted to talk about the draft? I hope you saw I made sure to thank you in the acknowledgments.'
+          },
+          rubric: [
+            'Argues from documented contributions and authorship criteria, not feelings of unfairness',
+            'Avoids accusatory framing that triggers defensiveness',
+            'Navigates the power imbalance with respect but without shrinking',
+            'Proposes a concrete resolution (authorship, contribution statement, escalation path)',
+            'Secures a specific commitment before the fifteen minutes run out'
           ]
         }
       ]
