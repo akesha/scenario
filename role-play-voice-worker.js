@@ -31,16 +31,16 @@ const ALLOWED_ORIGINS = [
 // Only the voices role-play.html offers — a stolen URL can't use arbitrary
 // (e.g. cloned) voices on your account.
 const ALLOWED_VOICE_IDS = new Set([
-  '21m00Tcm4TlvDq8ikWAM', // Rachel
-  'AZnzlk1XvdvUeBnXmlld', // Domi
-  'MF3mGyEYCl7XYWbV9V6O', // Elli
-  'ErXwobaYiN019PkySvjV', // Antoni
-  'TxGEqnHWrfWFTfGW9XjX', // Josh
-  'pNInz6obpgDQGcFmaJgB', // Adam
-  'VR6AewLTigWG4xSOukaG'  // Arnold
+  'DODLEQrClDo8wCz460ld', // Rachel
+  '4qGY1svUBZLI7l8Ei9WW', // Domi
+  'QzgYVYSNBgksoEWDkpKt', // Elli
+  'vSjOBQp24DUB2COr2xI9', // Antoni
+  '2P4cP21K2dEMLOlJYOAH', // Josh
+  'E5PHpGefnr5IJzWrdu68', // Adam
+  'LjgR63EZOqCPaDHcXtJa'  // Arnold
 ]);
 
-const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM';
+const DEFAULT_VOICE_ID = 'DODLEQrClDo8wCz460ld';
 
 export default {
   async fetch(request, env) {
