@@ -385,6 +385,12 @@
     font-style: italic;
   }
 
+  .chat-end-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 18px;
+  }
+
   .composer {
     display: flex;
     gap: 10px;
@@ -624,6 +630,10 @@
   .bank-heading { text-align: left; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
   .bank-heading strong { font-size: 1.15rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
   .bank-heading span { font-size: 0.82rem; }
+  .conduct-banner { display: none; background: #fdf0ef; border: 1px solid #f0c4bf; border-left: 4px solid var(--accent); border-radius: 10px; padding: 16px 18px; margin-bottom: 18px; }
+  .conduct-banner.show { display: block; }
+  .conduct-banner .conduct-title { font-weight: 700; font-size: 0.85rem; color: #93372c; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .conduct-banner p { font-size: 0.94rem; color: #5a1515; }
 </style>
 </head>
 <body>
@@ -796,6 +806,10 @@
       <textarea id="chat-input" rows="1" placeholder="Type your reply..."></textarea>
       <button class="icon-btn" id="btn-send" title="Send" aria-label="Send">➤</button>
     </div>
+
+    <div class="chat-end-row">
+      <button class="btn btn-secondary" id="btn-end-bottom">End &amp; get feedback</button>
+    </div>
   </section>
 
   <!-- ============ Screen 4: Feedback ============ -->
@@ -804,6 +818,11 @@
     <p class="screen-sub" id="fb-scenario-name"></p>
 
     <div class="overall" id="fb-overall"></div>
+
+    <div class="conduct-banner" id="fb-conduct">
+      <div class="conduct-title">⚠ Professional conduct</div>
+      <p id="fb-conduct-note"></p>
+    </div>
 
     <div class="card">
       <h3>How you did on each criterion</h3>
@@ -2137,6 +2156,7 @@ Rules:
 
   // ---------- Screen 4: feedback ----------
   $('btn-end').addEventListener('click', () => finishSession('btn-end', 'chat-error', 'dark'));
+  $('btn-end-bottom').addEventListener('click', () => finishSession('btn-end-bottom', 'chat-error', 'dark'));
   $('btn-call-end').addEventListener('click', () => finishSession('btn-call-end', 'call-error', ''));
 
   async function finishSession(btnId, errId, spinnerClass) {
@@ -2171,9 +2191,12 @@ ${transcript}
 
 Coach the student on the STUDENT lines only. Be specific — quote their actual words. Be encouraging but honest; vague praise helps no one. ${studentTurns < 3 ? 'The conversation was very short, so note that longer practice would give better feedback, but still coach what is there.' : ''}
 
+Separately, check the student's lines for professional or ethical misconduct — bribery, threats, harassment, discriminatory remarks, dishonesty, academic misconduct (e.g. misrepresenting who did the work), or pressuring the other person to act unethically. If any occurred, flag it directly: name what crossed the line, why it is an ethical issue and not just a communication misstep, and what the professional norm is. Do not soften it into a style note. If nothing crossed a line, do not invent a violation.
+
 Respond with ONLY a JSON object, no other text:
 {
   "overall": "2-3 sentence overall assessment, addressed to the student as 'you'",
+  "conduct": {"flagged": true or false, "note": "if flagged: 2-3 direct sentences quoting the misconduct, naming the ethical line crossed, and stating the professional norm; empty string if not flagged"},
   "scores": [{"criterion": "...", "score": 1-5, "comment": "one specific sentence"}],  // one entry per feedback criterion, in order
   "strengths": ["2-3 specific things they did well, quoting their words where possible"],
   "improvements": ["2-3 specific, actionable things to work on"],
@@ -2199,6 +2222,10 @@ Respond with ONLY a JSON object, no other text:
   function renderFeedback(fb) {
     $('fb-scenario-name').textContent = scenario.title + ' — with ' + scenario.persona.name;
     $('fb-overall').textContent = fb.overall || '';
+
+    const conduct = fb.conduct || {};
+    $('fb-conduct').classList.toggle('show', !!conduct.flagged && !!conduct.note);
+    $('fb-conduct-note').textContent = conduct.note || '';
 
     $('fb-scores').innerHTML = '';
     (fb.scores || []).forEach(s => {
