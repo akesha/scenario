@@ -20,15 +20,18 @@
 
 const ALLOWED_ORIGINS = [
   'https://akesha.github.io',
+  'https://pages.github.iu.edu',  // facultyresource copy on IU GitHub Enterprise
   'http://localhost:8000',
   'http://127.0.0.1:8000',
   'http://localhost:8080',
   'http://127.0.0.1:8080',
   'http://localhost:5173',
+  'http://localhost:8746',  // facultyresource local preview
+  'http://127.0.0.1:8746',
   'null' // file:// — lets you test by double-clicking the HTML locally
 ];
 
-// Only the voices role-play.html offers — a stolen URL can't use arbitrary
+// Only the voices our apps offer — a stolen URL can't use arbitrary
 // (e.g. cloned) voices on your account.
 const ALLOWED_VOICE_IDS = new Set([
   'DODLEQrClDo8wCz460ld', // Rachel
@@ -37,7 +40,8 @@ const ALLOWED_VOICE_IDS = new Set([
   'vSjOBQp24DUB2COr2xI9', // Antoni
   '2P4cP21K2dEMLOlJYOAH', // Josh
   'E5PHpGefnr5IJzWrdu68', // Adam
-  'LjgR63EZOqCPaDHcXtJa'  // Arnold
+  'LjgR63EZOqCPaDHcXtJa', // Arnold
+  '6aDn1KB0hjpdcocrUkmq'  // Teaching at Luddy chatbot (facultyresource chat.js)
 ]);
 
 const DEFAULT_VOICE_ID = 'DODLEQrClDo8wCz460ld';
