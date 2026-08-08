@@ -1,0 +1,3 @@
+name = "roleplay-voice"
+main = "role-play-voice-worker.js"
+compatibility_date = "2026-08-01"
